@@ -241,18 +241,20 @@ func generateGenesis(ctx context.Context) (state.BeaconState, error) {
 		return nil, err
 	}
 
-	proposerLookahead, err := helpers.InitializeProposerLookahead(ctx, genesisState, params.LastForkEpoch())
-	if err != nil {
-		return nil, errors.Wrap(err, "could not initialize proposer lookahead")
-	}
+	if v == version.Fulu {
+		proposerLookahead, err := helpers.InitializeProposerLookahead(ctx, genesisState, params.LastForkEpoch())
+		if err != nil {
+			return nil, errors.Wrap(err, "could not initialize proposer lookahead")
+		}
 
-	var proposerIndexList = make([]primitives.ValidatorIndex, len(proposerLookahead))
-	for idx := range proposerLookahead {
-		proposerIndexList[idx] = primitives.ValidatorIndex(idx)
-	}
+		var proposerIndexList = make([]primitives.ValidatorIndex, len(proposerLookahead))
+		for idx := range proposerLookahead {
+			proposerIndexList[idx] = primitives.ValidatorIndex(idx)
+		}
 
-	if err := genesisState.SetProposerLookahead(proposerIndexList); err != nil {
-		return nil, errors.Wrap(err, "could not set proposer lookahead")
+		if err := genesisState.SetProposerLookahead(proposerIndexList); err != nil {
+			return nil, errors.Wrap(err, "could not set proposer lookahead")
+		}
 	}
 
 	if f.OverrideEth1Data {
