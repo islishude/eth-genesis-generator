@@ -10,8 +10,10 @@ import (
 	"strings"
 	"time"
 
+	"github.com/OffchainLabs/prysm/v6/beacon-chain/core/helpers"
 	"github.com/OffchainLabs/prysm/v6/beacon-chain/state"
 	"github.com/OffchainLabs/prysm/v6/config/params"
+	"github.com/OffchainLabs/prysm/v6/consensus-types/primitives"
 	"github.com/OffchainLabs/prysm/v6/container/trie"
 	"github.com/OffchainLabs/prysm/v6/io/file"
 	ethpb "github.com/OffchainLabs/prysm/v6/proto/prysm/v1alpha1"
@@ -120,7 +122,7 @@ func cliActionGenerateGenesisState(cliCtx *cli.Context) error {
 		marshalFn := func(o interface{}) ([]byte, error) {
 			marshaler, ok := o.(MinimumSSZMarshal)
 			if !ok {
-				return nil, errors.New("not a marshaler")
+				return nil, errors.New("not a MinimumSSZMarshal")
 			}
 			return marshaler.MarshalSSZ()
 		}
@@ -237,6 +239,20 @@ func generateGenesis(ctx context.Context) (state.BeaconState, error) {
 	genesisState, err := interop.NewPreminedGenesis(ctx, time.Unix(int64(f.GenesisTime), 0), nv, 0, v, gb, opts...)
 	if err != nil {
 		return nil, err
+	}
+
+	proposerLookahead, err := helpers.InitializeProposerLookahead(ctx, genesisState, params.LastForkEpoch())
+	if err != nil {
+		return nil, errors.Wrap(err, "could not initialize proposer lookahead")
+	}
+
+	var proposerIndexList = make([]primitives.ValidatorIndex, len(proposerLookahead))
+	for idx := range proposerLookahead {
+		proposerIndexList[idx] = primitives.ValidatorIndex(idx)
+	}
+
+	if err := genesisState.SetProposerLookahead(proposerIndexList); err != nil {
+		return nil, errors.Wrap(err, "could not set proposer lookahead")
 	}
 
 	if f.OverrideEth1Data {
