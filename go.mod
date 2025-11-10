@@ -4,7 +4,7 @@ go 1.25.1
 
 require (
 	github.com/OffchainLabs/prysm/v6 v6.1.3
-	github.com/ethereum/go-ethereum v1.16.5
+	github.com/ethereum/go-ethereum v1.16.7
 	github.com/ghodss/yaml v1.0.0
 	github.com/pkg/errors v0.9.1
 	github.com/sirupsen/logrus v1.9.3
@@ -14,6 +14,7 @@ require (
 require (
 	github.com/BurntSushi/toml v1.5.0 // indirect
 	github.com/Microsoft/go-winio v0.6.2 // indirect
+	github.com/ProjectZKM/Ziren/crates/go-runtime/zkvm_runtime v0.0.0-20251001021608-1fe7b43fc4d6 // indirect
 	github.com/VictoriaMetrics/fastcache v1.13.0 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/bits-and-blooms/bitset v1.20.0 // indirect
