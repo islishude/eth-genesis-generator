@@ -3,7 +3,7 @@ module github.com/islishude/eth-genesis-generator
 go 1.25.1
 
 require (
-	github.com/OffchainLabs/prysm/v6 v6.1.3
+	github.com/OffchainLabs/prysm/v6 v6.1.4
 	github.com/ethereum/go-ethereum v1.16.7
 	github.com/ghodss/yaml v1.0.0
 	github.com/pkg/errors v0.9.1
