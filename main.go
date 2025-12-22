@@ -5,7 +5,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/OffchainLabs/prysm/v6/cmd/flags"
+	"github.com/OffchainLabs/prysm/v7/cmd/flags"
 	"github.com/sirupsen/logrus"
 	"github.com/urfave/cli/v2"
 )
