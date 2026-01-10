@@ -6,8 +6,8 @@ github.com/Microsoft/go-winio v0.6.2 h1:F2VQgta7ecxGYO8k3ZZz3RS8fVIXVxONVUPlNERo
 github.com/Microsoft/go-winio v0.6.2/go.mod h1:yd8OoFMLzJbo9gZq8j5qaps8bJ9aShtEA8Ipt1oGCvU=
 github.com/OffchainLabs/go-bitfield v0.0.0-20251031151322-f427d04d8506 h1:d/SJkN8/9Ca+1YmuDiUJxAiV4w/a9S8NcsG7GMQSrVI=
 github.com/OffchainLabs/go-bitfield v0.0.0-20251031151322-f427d04d8506/go.mod h1:6TZI4FU6zT8x6ZfWa1J8YQ2NgW0wLV/W3fHRca8ISBo=
-github.com/OffchainLabs/prysm/v7 v7.1.1 h1:ecLHiOC8nMAtnZCPZJUi7jzjVFi1kiE+BB7XreyReU4=
-github.com/OffchainLabs/prysm/v7 v7.1.1/go.mod h1:1ugpt9S658pSPyuT6NufoQmJt+s7GLkBJK8NV1buNmM=
+github.com/OffchainLabs/prysm/v7 v7.1.2 h1:XhsnrN0mxw9yEuSAI+J1SFCgQ+nolRT9Dp/AK53bR5g=
+github.com/OffchainLabs/prysm/v7 v7.1.2/go.mod h1:1ugpt9S658pSPyuT6NufoQmJt+s7GLkBJK8NV1buNmM=
 github.com/ProjectZKM/Ziren/crates/go-runtime/zkvm_runtime v0.0.0-20251001021608-1fe7b43fc4d6 h1:1zYrtlhrZ6/b6SAjLSfKzWtdgqK0U+HtH/VcBWh1BaU=
 github.com/ProjectZKM/Ziren/crates/go-runtime/zkvm_runtime v0.0.0-20251001021608-1fe7b43fc4d6/go.mod h1:ioLG6R+5bUSO1oeGSDxOV3FADARuMoytZCSX6MEMQkI=
 github.com/VictoriaMetrics/fastcache v1.13.0 h1:AW4mheMR5Vd9FkAPUv+NH6Nhw+fmbTMGMsNAoA/+4G0=
