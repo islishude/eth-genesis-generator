@@ -9,9 +9,12 @@ It does not predeploy the deposit contract bytecode in v1.
 ## Usage
 
 ```bash
-go run ./cmd/eth-genesis-generator init --out ./devnet
-go run ./cmd/eth-genesis-generator generate --config ./devnet/genesis.yaml --out ./artifacts
+eth-genesis-generator init --out ./devnet
+eth-genesis-generator generate --config ./devnet/genesis.yaml --out ./artifacts
 ```
+
+See [example.md](./example.md) for local Geth/Reth and Prysm/Lighthouse
+integration examples.
 
 ## Development
 
