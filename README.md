@@ -1,5 +1,43 @@
 # eth-genesis-generator
 
-A tool to generate custom Ethereum genesis files for private networks.
+Go CLI for generating local Ethereum proof-of-stake devnet genesis artifacts.
 
-It forks from prysmaticlabs/prysm and adds additional features and customizations.
+The default profile creates an execution-layer genesis with Osaka active at
+genesis and a consensus-layer Fulu `genesis.ssz` with pre-filled validators.
+It does not predeploy the deposit contract bytecode in v1.
+
+## Usage
+
+```bash
+go run ./cmd/eth-genesis-generator init --out ./devnet
+go run ./cmd/eth-genesis-generator generate --config ./devnet/genesis.yaml --out ./artifacts
+```
+
+## Development
+
+```bash
+make build
+make test
+make lint
+make format
+make smoke
+```
+
+Generated files:
+
+- `execution/genesis.json`
+- `consensus/config.yaml`
+- `consensus/genesis.ssz`
+- `consensus/genesis.json`
+- `validators/mnemonics.yaml`
+- `manifest.json`
+
+`validators/mnemonics.yaml` contains validator seed material. Treat it as a
+secret for any network that carries value.
+
+To validate the execution genesis without a separately installed `geth` binary:
+
+```bash
+geth_datadir="$(mktemp -d)"
+go tool github.com/ethereum/go-ethereum/cmd/geth init --datadir "$geth_datadir" ./artifacts/execution/genesis.json
+```
