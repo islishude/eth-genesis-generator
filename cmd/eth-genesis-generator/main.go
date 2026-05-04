@@ -1,115 +1,255 @@
 package main
 
 import (
-	"flag"
 	"fmt"
 	"io"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/islishude/eth-genesis-generator/internal/artifacts"
 	appconfig "github.com/islishude/eth-genesis-generator/internal/config"
+	"github.com/urfave/cli/v2"
 )
 
 func main() {
 	os.Exit(run(os.Args[1:], os.Stdout, os.Stderr))
 }
 
-// run dispatches CLI commands and returns the process exit code.
+// run executes the CLI and returns the process exit code.
 func run(args []string, stdout, stderr io.Writer) int {
-	if len(args) == 0 {
-		printUsage(stderr)
-		return 2
-	}
-
-	switch args[0] {
-	case "init":
-		return runInit(args[1:], stdout, stderr)
-	case "generate":
-		return runGenerate(args[1:], stdout, stderr)
-	case "help", "-h", "--help":
-		printUsage(stdout)
-		return 0
-	default:
-		_, _ = fmt.Fprintf(stderr, "unknown command %q\n\n", args[0])
-		printUsage(stderr)
-		return 2
-	}
-}
-
-// runInit writes a starter genesis.yaml without overwriting an existing file.
-func runInit(args []string, stdout, stderr io.Writer) int {
-	fs := flag.NewFlagSet("init", flag.ContinueOnError)
-	fs.SetOutput(stderr)
-	out := fs.String("out", "./devnet", "directory to write genesis.yaml into")
-	if err := fs.Parse(args); err != nil {
-		return 2
-	}
-
-	if err := os.MkdirAll(*out, 0o755); err != nil {
-		_, _ = fmt.Fprintf(stderr, "create output directory: %v\n", err)
+	app := newApp(stdout, stderr)
+	if err := app.Run(append([]string{app.Name}, args...)); err != nil {
+		if msg := err.Error(); msg != "" {
+			_, _ = fmt.Fprintln(stderr, msg)
+		}
+		if exitErr, ok := err.(interface{ ExitCode() int }); ok {
+			return exitErr.ExitCode()
+		}
 		return 1
 	}
-
-	configPath := filepath.Join(*out, "genesis.yaml")
-	if _, err := os.Stat(configPath); err == nil {
-		_, _ = fmt.Fprintf(stderr, "%s already exists\n", configPath)
-		return 1
-	} else if !os.IsNotExist(err) {
-		_, _ = fmt.Fprintf(stderr, "stat %s: %v\n", configPath, err)
-		return 1
-	}
-
-	if err := os.WriteFile(configPath, []byte(appconfig.ExampleYAML()), 0o644); err != nil {
-		_, _ = fmt.Fprintf(stderr, "write %s: %v\n", configPath, err)
-		return 1
-	}
-
-	_, _ = fmt.Fprintf(stdout, "wrote %s\n", configPath)
 	return 0
 }
 
+func newApp(stdout, stderr io.Writer) *cli.App {
+	return &cli.App{
+		Name:                 "eth-genesis-generator",
+		Usage:                "Generate local Ethereum PoS devnet genesis artifacts",
+		Writer:               stdout,
+		ErrWriter:            stderr,
+		HideHelpCommand:      true,
+		EnableBashCompletion: false,
+		Action: func(ctx *cli.Context) error {
+			if err := cli.ShowAppHelp(ctx); err != nil {
+				return err
+			}
+			return cli.Exit("", 2)
+		},
+		Commands: []*cli.Command{
+			{
+				Name:  "init",
+				Usage: "Write a configurable genesis.yaml template",
+				Flags: initFlags(),
+				Action: func(ctx *cli.Context) error {
+					return runInit(ctx, stdout)
+				},
+			},
+			{
+				Name:  "generate",
+				Usage: "Generate all genesis artifacts from genesis.yaml",
+				Flags: []cli.Flag{
+					&cli.StringFlag{
+						Name:     "config",
+						Usage:    "path to genesis.yaml",
+						Required: true,
+					},
+					&cli.StringFlag{
+						Name:  "out",
+						Usage: "directory to write generated artifacts into",
+						Value: "./artifacts",
+					},
+				},
+				Action: func(ctx *cli.Context) error {
+					return runGenerate(ctx, stdout)
+				},
+			},
+		},
+	}
+}
+
+func initFlags() []cli.Flag {
+	return []cli.Flag{
+		&cli.StringFlag{
+			Name:  "out",
+			Usage: "directory to write genesis.yaml into",
+			Value: "./devnet",
+		},
+		&cli.StringFlag{
+			Name:  "network-name",
+			Usage: "network name to write into genesis.yaml",
+			Value: appconfig.DefaultNetworkName,
+		},
+		&cli.Uint64Flag{
+			Name:  "chain-id",
+			Usage: "execution and deposit chain ID",
+			Value: appconfig.DefaultChainID,
+		},
+		&cli.Uint64Flag{
+			Name:  "genesis-time",
+			Usage: "Unix genesis timestamp; 0 means generate uses current time + 60 seconds",
+			Value: 0,
+		},
+		&cli.Uint64Flag{
+			Name:  "gas-limit",
+			Usage: "execution genesis gas limit",
+			Value: appconfig.DefaultGasLimit,
+		},
+		&cli.StringFlag{
+			Name:  "base-fee-per-gas",
+			Usage: "execution genesis base fee per gas as a decimal string",
+			Value: appconfig.DefaultBaseFeePerGas,
+		},
+		&cli.StringSliceFlag{
+			Name:  "prefund",
+			Usage: "prefunded execution account as ADDRESS=AMOUNT; repeatable",
+		},
+		&cli.StringFlag{
+			Name:  "fork",
+			Usage: fmt.Sprintf("consensus fork activated at genesis; supported: %s", joinForks()),
+			Value: appconfig.DefaultFork,
+		},
+		&cli.StringFlag{
+			Name:  "preset-base",
+			Usage: "consensus preset base",
+			Value: appconfig.DefaultPresetBase,
+		},
+		&cli.Uint64Flag{
+			Name:  "validator-count",
+			Usage: "number of pre-filled validators",
+			Value: appconfig.DefaultValidatorCount,
+		},
+		&cli.Uint64Flag{
+			Name:  "validator-balance-gwei",
+			Usage: "initial validator balance in gwei",
+			Value: appconfig.DefaultValidatorBalanceGwei,
+		},
+		&cli.StringFlag{
+			Name:  "mnemonic",
+			Usage: "validator mnemonic; empty means generate a new 24-word mnemonic during generate",
+			Value: "",
+		},
+		&cli.StringFlag{
+			Name:  "withdrawal-address",
+			Usage: "validator withdrawal Ethereum address",
+			Value: appconfig.DefaultWithdrawalAddress,
+		},
+		&cli.StringFlag{
+			Name:  "withdrawal-prefix",
+			Usage: "one-byte 0x-prefixed withdrawal credential prefix",
+			Value: appconfig.DefaultWithdrawalPrefix,
+		},
+		&cli.StringFlag{
+			Name:  "deposit-contract-address",
+			Usage: "deposit contract Ethereum address",
+			Value: appconfig.DefaultDepositContractAddress,
+		},
+		&cli.BoolFlag{
+			Name:  "output-json",
+			Usage: "write consensus/genesis.json during generate",
+			Value: true,
+		},
+		&cli.BoolFlag{
+			Name:  "force",
+			Usage: "overwrite an existing genesis.yaml",
+			Value: false,
+		},
+	}
+}
+
+// runInit writes a starter genesis.yaml without generating artifacts.
+func runInit(ctx *cli.Context, stdout io.Writer) error {
+	cfg := appconfig.DefaultInitConfig()
+	cfg.Network.Name = ctx.String("network-name")
+	cfg.Network.ChainID = ctx.Uint64("chain-id")
+	cfg.Network.GenesisTime = ctx.Uint64("genesis-time")
+	cfg.Execution.GasLimit = ctx.Uint64("gas-limit")
+	cfg.Execution.BaseFeePerGas = ctx.String("base-fee-per-gas")
+	cfg.Consensus.Fork = ctx.String("fork")
+	cfg.Consensus.PresetBase = ctx.String("preset-base")
+	cfg.Consensus.ValidatorCount = ctx.Uint64("validator-count")
+	cfg.Consensus.ValidatorBalanceGwei = ctx.Uint64("validator-balance-gwei")
+	cfg.Consensus.Mnemonic = ctx.String("mnemonic")
+	cfg.Consensus.WithdrawalAddress = ctx.String("withdrawal-address")
+	cfg.Consensus.WithdrawalPrefix = ctx.String("withdrawal-prefix")
+	cfg.Consensus.DepositContractAddress = ctx.String("deposit-contract-address")
+	outputJSON := ctx.Bool("output-json")
+	cfg.Consensus.OutputJSON = &outputJSON
+
+	if ctx.IsSet("prefund") {
+		prefund, err := appconfig.ParsePrefundEntries(ctx.StringSlice("prefund"))
+		if err != nil {
+			return err
+		}
+		cfg.Execution.Prefund = prefund
+	}
+	if err := cfg.ValidateInit(); err != nil {
+		return err
+	}
+
+	out := ctx.String("out")
+	if err := os.MkdirAll(out, 0o755); err != nil {
+		return fmt.Errorf("create output directory: %w", err)
+	}
+
+	configPath := filepath.Join(out, "genesis.yaml")
+	if !ctx.Bool("force") {
+		if _, err := os.Stat(configPath); err == nil {
+			return fmt.Errorf("%s already exists; use --force to overwrite", configPath)
+		} else if !os.IsNotExist(err) {
+			return fmt.Errorf("stat %s: %w", configPath, err)
+		}
+	}
+
+	if err := os.WriteFile(configPath, []byte(appconfig.RenderInitYAML(cfg)), 0o644); err != nil {
+		return fmt.Errorf("write %s: %w", configPath, err)
+	}
+
+	_, _ = fmt.Fprintf(stdout, "wrote %s\n", configPath)
+	return nil
+}
+
 // runGenerate loads a config file and writes all genesis artifacts.
-func runGenerate(args []string, stdout, stderr io.Writer) int {
-	fs := flag.NewFlagSet("generate", flag.ContinueOnError)
-	fs.SetOutput(stderr)
-	configPath := fs.String("config", "", "path to genesis.yaml")
-	out := fs.String("out", "./artifacts", "directory to write generated artifacts into")
-	if err := fs.Parse(args); err != nil {
-		return 2
-	}
-	if *configPath == "" {
-		_, _ = fmt.Fprintln(stderr, "missing required --config")
-		return 2
-	}
-
-	cfg, err := appconfig.LoadFile(*configPath, time.Now())
+func runGenerate(ctx *cli.Context, stdout io.Writer) error {
+	out := ctx.String("out")
+	cfg, err := appconfig.LoadFile(ctx.String("config"), time.Now())
 	if err != nil {
-		_, _ = fmt.Fprintf(stderr, "load config: %v\n", err)
-		return 1
+		return fmt.Errorf("load config: %w", err)
 	}
 
-	manifest, err := artifacts.Generate(cfg, *out, time.Now())
+	manifest, err := artifacts.Generate(cfg, out, time.Now())
 	if err != nil {
-		_, _ = fmt.Fprintf(stderr, "generate artifacts: %v\n", err)
-		return 1
+		return fmt.Errorf("generate artifacts: %w", err)
 	}
 
-	_, _ = fmt.Fprintf(stdout, "wrote artifacts to %s\n", *out)
+	_, _ = fmt.Fprintf(stdout, "wrote artifacts to %s\n", out)
 	_, _ = fmt.Fprintf(stdout, "execution genesis hash: %s\n", manifest.ExecutionGenesisHash)
 	_, _ = fmt.Fprintf(stdout, "consensus state version: %s\n", manifest.StateVersion)
 	_, _ = fmt.Fprintf(stdout, "validators: %d\n", manifest.ValidatorCount)
 	_, _ = fmt.Fprintf(stdout, "validator keystores: %d\n", manifest.ValidatorKeystoreCount)
-	_, _ = fmt.Fprintf(stdout, "validator keystore password: %s\n", filepath.Join(*out, "validators", "keystores", "password.txt"))
-	return 0
+	_, _ = fmt.Fprintf(stdout, "validator keystore password: %s\n", filepath.Join(out, "validators", "keystores", "password.txt"))
+	return nil
 }
 
-func printUsage(w io.Writer) {
-	_, _ = fmt.Fprint(w, `eth-genesis-generator generates local Ethereum PoS devnet genesis artifacts.
-
-Usage:
-  eth-genesis-generator init --out ./devnet
-  eth-genesis-generator generate --config ./devnet/genesis.yaml --out ./artifacts
-`)
+func joinForks() string {
+	forks := appconfig.SupportedForks()
+	if len(forks) == 0 {
+		return ""
+	}
+	var out strings.Builder
+	out.WriteString(forks[0])
+	for _, fork := range forks[1:] {
+		out.WriteString(", " + fork)
+	}
+	return out.String()
 }
