@@ -4,7 +4,7 @@ BIN_DIR := bin
 BIN := $(BIN_DIR)/$(APP)
 GO_PACKAGES := ./...
 
-.PHONY: help build test lint format tidy check smoke clean
+.PHONY: all help build test lint format tidy check smoke clean
 
 help:
 	@printf '%s\n' \
@@ -16,6 +16,8 @@ help:
 		'  check   Run format, tidy check' \
 		'  smoke   Run init+generate in a temporary directory' \
 		'  clean   Remove build output'
+
+all: build lint format test
 
 build:
 	@mkdir -p $(BIN_DIR)
