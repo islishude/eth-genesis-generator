@@ -14,7 +14,6 @@ import (
 
 // BuildGenesis constructs a geth core.Genesis with all execution forks active at genesis.
 func BuildGenesis(cfg *appconfig.Config) (*core.Genesis, error) {
-	zero := uint64(0)
 	baseFee, err := appconfig.ParseBigInt(cfg.Execution.BaseFeePerGas)
 	if err != nil {
 		return nil, err
@@ -41,14 +40,8 @@ func BuildGenesis(cfg *appconfig.Config) (*core.Genesis, error) {
 		Alloc:      alloc,
 		BaseFee:    baseFee,
 		// Osaka genesis blocks must carry blob gas fields so geth accepts the file.
-		BlobGasUsed: func() *uint64 {
-			v := zero
-			return &v
-		}(),
-		ExcessBlobGas: func() *uint64 {
-			v := zero
-			return &v
-		}(),
+		BlobGasUsed:   new(uint64(0)),
+		ExcessBlobGas: new(uint64(0)),
 	}, nil
 }
 
