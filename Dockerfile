@@ -5,6 +5,6 @@ WORKDIR /app
 COPY . .
 RUN --mount=type=cache,target=/go/pkg/mod --mount=type=cache,target=/root/.cache/go-build make install
 
-FROM alpine:latest
-COPY --from=compiler /go/bin/* /usr/local/bin/
+FROM gcr.io/distroless/base-debian13:latest
+COPY --from=compiler /go/bin/eth-genesis-generator /usr/local/bin/
 ENTRYPOINT [ "eth-genesis-generator" ]
