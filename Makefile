@@ -23,7 +23,7 @@ build:
 	go build -o $(BIN) $(CMD)
 
 install:
-	go install -trimpath -ldflags="-s -w" ./cmd/...
+	go install -trimpath -ldflags="-s -w" $(CMD)
 
 test:
 	go test $(GO_PACKAGES)
