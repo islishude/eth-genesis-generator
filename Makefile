@@ -13,8 +13,7 @@ help:
 		'  test    Run Go tests' \
 		'  lint    Run go vet' \
 		'  format  Run gofmt on cmd and internal packages' \
-		'  tidy    Run go mod tidy' \
-		'  check   Run format, tidy, lint, and test' \
+		'  check   Run format, tidy check' \
 		'  smoke   Run init+generate in a temporary directory' \
 		'  clean   Remove build output'
 
@@ -35,14 +34,12 @@ lint:
 format:
 	gofmt -w -s .
 	go fix ./...
+	go mod tidy
 
 check:
 	gofmt -d .
 	go fix -diff ./...
 	go mod tidy -diff 
-
-tidy:
-	go mod tidy
 
 smoke:
 	@tmpdir=$$(mktemp -d); \

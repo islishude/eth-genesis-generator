@@ -100,6 +100,8 @@ func runGenerate(args []string, stdout, stderr io.Writer) int {
 	_, _ = fmt.Fprintf(stdout, "execution genesis hash: %s\n", manifest.ExecutionGenesisHash)
 	_, _ = fmt.Fprintf(stdout, "consensus state version: %s\n", manifest.StateVersion)
 	_, _ = fmt.Fprintf(stdout, "validators: %d\n", manifest.ValidatorCount)
+	_, _ = fmt.Fprintf(stdout, "validator keystores: %d\n", manifest.ValidatorKeystoreCount)
+	_, _ = fmt.Fprintf(stdout, "validator keystore password: %s\n", filepath.Join(*out, "validators", "keystores", "password.txt"))
 	return 0
 }
 

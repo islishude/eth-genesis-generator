@@ -29,10 +29,13 @@ The generated directory contains:
 - `consensus/genesis.ssz`
 - `consensus/genesis.json`
 - `validators/mnemonics.yaml`
+- `validators/keystores/*.json`
+- `validators/keystores/password.txt`
 - `manifest.json`
 
-`validators/mnemonics.yaml` contains validator seed material. Do not commit it
-unless the file is an explicit fixture for a test.
+`validators/mnemonics.yaml` and `validators/keystores/` contain validator
+secret material. Do not commit them unless they are explicit fixtures for a
+test.
 
 ## Shared Local Setup
 
@@ -45,20 +48,17 @@ export RUNDIR="$PWD/run"
 export JWT="$RUNDIR/jwt.hex"
 export CHAIN_ID=32382
 export FEE_RECIPIENT=0x1000000000000000000000000000000000000001
-export VALIDATOR_KEYS="$RUNDIR/validator-keys"
-export VALIDATOR_PASSWORD="$RUNDIR/validator-password.txt"
+export VALIDATOR_KEYS="$ARTIFACTS/validators/keystores"
+export VALIDATOR_PASSWORD="$ARTIFACTS/validators/keystores/password.txt"
 
-mkdir -p "$RUNDIR" "$VALIDATOR_KEYS"
+mkdir -p "$RUNDIR"
 openssl rand -hex 32 | tr -d '\n' > "$JWT"
-printf "devnet-password\n" > "$VALIDATOR_PASSWORD"
-chmod 600 "$JWT" "$VALIDATOR_PASSWORD"
+chmod 600 "$JWT"
 ```
 
 If `network.chain_id` was changed in `genesis.yaml`, update `CHAIN_ID` to match.
-Populate `VALIDATOR_KEYS` with EIP-2335 keystore JSON files derived from the
-same mnemonic, `start`, and `count` values in `validators/mnemonics.yaml`.
-The `VALIDATOR_PASSWORD` file must contain the password used to encrypt those
-keystores.
+`VALIDATOR_KEYS` and `VALIDATOR_PASSWORD` point at the generated EIP-2335
+keystores and password file.
 
 ## Execution Client: Geth
 
@@ -247,10 +247,9 @@ chain will not produce blocks until a validator client controls keys that match
 the validators in `validators/mnemonics.yaml`.
 
 `eth-genesis-generator` writes the mnemonic input used to create the genesis
-validators, but it does not currently export client-specific validator
-keystores. Generate/import validator keys for the selected validator client from
-the same mnemonic, `start`, and `count` values before expecting the chain to
-advance.
+validators and EIP-2335 keystores derived from the same `start` and `count`
+values. Import those keystores into the selected validator client before
+expecting the chain to advance.
 
 Never run the same validator keys in more than one validator client at the same
 time.

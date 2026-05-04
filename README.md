@@ -33,10 +33,12 @@ Generated files:
 - `consensus/genesis.ssz`
 - `consensus/genesis.json`
 - `validators/mnemonics.yaml`
+- `validators/keystores/*.json`
+- `validators/keystores/password.txt`
 - `manifest.json`
 
-`validators/mnemonics.yaml` contains validator seed material. Treat it as a
-secret for any network that carries value.
+`validators/mnemonics.yaml` and `validators/keystores/` contain validator
+secret material. Treat them as secrets for any network that carries value.
 
 To validate the execution genesis without a separately installed `geth` binary:
 

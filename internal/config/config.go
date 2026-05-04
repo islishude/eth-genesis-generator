@@ -10,7 +10,7 @@ import (
 	"time"
 
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/islishude/bip39"
+	bip39 "github.com/tyler-smith/go-bip39"
 	"gopkg.in/yaml.v3"
 )
 
@@ -230,7 +230,7 @@ func (c *Config) Validate() error {
 	if c.Consensus.ValidatorBalanceGwei == 0 {
 		return fmt.Errorf("consensus.validator_balance_gwei must be greater than zero")
 	}
-	if c.Consensus.Mnemonic != "" && !bip39.IsMnemonicValid(c.Consensus.Mnemonic, bip39.English) {
+	if c.Consensus.Mnemonic != "" && !bip39.IsMnemonicValid(c.Consensus.Mnemonic) {
 		return fmt.Errorf("consensus.mnemonic is not a valid BIP-39 mnemonic")
 	}
 	if err := ValidateAddress("consensus.withdrawal_address", c.Consensus.WithdrawalAddress); err != nil {

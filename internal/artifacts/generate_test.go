@@ -39,6 +39,8 @@ func TestGenerateArtifacts(t *testing.T) {
 		"consensus/genesis.ssz",
 		"consensus/genesis.json",
 		"validators/mnemonics.yaml",
+		"validators/keystores/password.txt",
+		"validators/keystores/keystore-000000.json",
 		"manifest.json",
 	} {
 		if _, err := os.Stat(filepath.Join(outDir, filepath.FromSlash(relPath))); err != nil {
@@ -56,5 +58,14 @@ func TestGenerateArtifacts(t *testing.T) {
 	}
 	if decoded.ArtifactHashes["consensus/genesis.ssz"] == "" {
 		t.Fatal("missing genesis.ssz artifact hash")
+	}
+	if decoded.ValidatorKeystoreCount != 1 {
+		t.Fatalf("validator keystore count = %d", decoded.ValidatorKeystoreCount)
+	}
+	if decoded.ArtifactHashes["validators/keystores/password.txt"] == "" {
+		t.Fatal("missing validator keystore password artifact hash")
+	}
+	if decoded.ArtifactHashes["validators/keystores/keystore-000000.json"] == "" {
+		t.Fatal("missing validator keystore artifact hash")
 	}
 }

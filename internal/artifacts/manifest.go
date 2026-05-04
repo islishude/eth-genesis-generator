@@ -25,6 +25,8 @@ type Manifest struct {
 	StateVersion string `json:"state_version"`
 	// ValidatorCount is the number of validators in consensus/genesis.ssz.
 	ValidatorCount uint64 `json:"validator_count"`
+	// ValidatorKeystoreCount is the number of generated EIP-2335 validator keystores.
+	ValidatorKeystoreCount uint64 `json:"validator_keystore_count"`
 	// GeneratedMnemonic reports whether the CLI generated validator secret material.
 	GeneratedMnemonic bool `json:"generated_mnemonic"`
 	// GeneratedAtUnix is the wall-clock time when artifacts were written.
