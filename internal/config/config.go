@@ -22,7 +22,7 @@ const (
 	DefaultChainID = uint64(32382)
 
 	// DefaultGasLimit is the execution genesis gas limit.
-	DefaultGasLimit = uint64(36_000_000)
+	DefaultGasLimit = uint64(60_000_000)
 
 	// DefaultBaseFeePerGas is the London base fee encoded as a decimal string.
 	DefaultBaseFeePerGas = "1000000000"
