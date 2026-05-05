@@ -19,7 +19,7 @@ eth-genesis-generator init --out ./devnet
 # Optional: edit ./devnet/genesis.yaml before generating.
 eth-genesis-generator generate \
   --config ./devnet/genesis.yaml \
-  --out ./artifacts
+  --out ./devnet/artifacts
 ```
 
 The generated directory contains:
@@ -37,13 +37,45 @@ The generated directory contains:
 secret material. Do not commit them unless they are explicit fixtures for a
 test.
 
+## Docker Compose: Reth + Lighthouse
+
+The compose example builds the current repository image, writes
+`./devnet/genesis.yaml`, generates artifacts into `./devnet/artifacts`, prepares
+Reth/Lighthouse runtime data under `./devnet/runtime`, then starts a local
+Reth + Lighthouse devnet.
+
+Run the genesis compose file first:
+
+```bash
+docker compose -f example/docker-compose.genesis.yml up --build --abort-on-container-exit
+docker compose -f example/docker-compose.genesis.yml down
+```
+
+Then run the initialization compose file:
+
+```bash
+docker compose -f example/docker-compose.init.yml up --abort-on-container-exit
+docker compose -f example/docker-compose.init.yml down
+```
+
+Then start the nodes:
+
+```bash
+docker compose -f example/docker-compose.yml up
+```
+
+The genesis compose uses `init --force`, so it rewrites `./devnet/genesis.yaml`
+with the default template before generating artifacts. If you change
+`network.chain_id` in `genesis.yaml`, also update Reth's `--network-id` in
+`example/docker-compose.yml`.
+
 ## Shared Local Setup
 
 Use the same JWT secret for the execution client auth RPC and the consensus
 client execution endpoint.
 
 ```bash
-export ARTIFACTS="$PWD/artifacts"
+export ARTIFACTS="$PWD/devnet/artifacts"
 export RUNDIR="$PWD/run"
 export JWT="$RUNDIR/jwt.hex"
 export CHAIN_ID=32382

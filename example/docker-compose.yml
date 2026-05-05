@@ -1,0 +1,126 @@
+# Run from the repository root after example/docker-compose.init.yml succeeds:
+#   docker compose -f example/docker-compose.yml up
+
+name: devnet
+
+x-reth-image: &reth-image ghcr.io/paradigmxyz/reth:v2.2.0
+x-lighthouse-image: &lighthouse-image sigp/lighthouse:v8.1.3
+x-log-local: &log-local
+  driver: local
+
+services:
+  reth:
+    image: *reth-image
+    restart: unless-stopped
+    command:
+      - node
+      - --datadir=/data
+      - --chain=/config/genesis.json
+      - --network-id=32382
+      - --disable-discovery
+      - --http
+      - --http.addr=0.0.0.0
+      - --http.port=8545
+      - --http.api=eth,net,web3,debug,txpool
+      - --http.corsdomain=*
+      - --authrpc.addr=0.0.0.0
+      - --authrpc.port=8551
+      - --authrpc.jwtsecret=/jwt/jwt.hex
+    volumes:
+      - type: bind
+        source: ${PWD:?run this compose file from the repository
+          root}/devnet/runtime/reth
+        target: /data
+        bind:
+          create_host_path: false
+      - type: bind
+        source: ${PWD:?run this compose file from the repository
+          root}/devnet/artifacts/execution/genesis.json
+        target: /config/genesis.json
+        read_only: true
+        bind:
+          create_host_path: false
+      - type: bind
+        source: ${PWD:?run this compose file from the repository
+          root}/devnet/runtime/jwt
+        target: /jwt
+        read_only: true
+        bind:
+          create_host_path: false
+    ports:
+      - "127.0.0.1:8545:8545"
+      - "127.0.0.1:8551:8551"
+    logging: *log-local
+
+  lighthouse-beacon:
+    image: *lighthouse-image
+    restart: unless-stopped
+    command:
+      - lighthouse
+      - beacon_node
+      - --datadir=/data
+      - --testnet-dir=/testnet
+      - --execution-endpoint=http://reth:8551
+      - --execution-jwt=/jwt/jwt.hex
+      - --http
+      - --http-address=0.0.0.0
+      - --http-port=5052
+      - --target-peers=0
+      - --allow-insecure-genesis-sync
+      - --suggested-fee-recipient=0x1000000000000000000000000000000000000001
+    depends_on:
+      reth:
+        condition: service_started
+    volumes:
+      - type: bind
+        source: ${PWD:?run this compose file from the repository
+          root}/devnet/runtime/lighthouse/beacon
+        target: /data
+        bind:
+          create_host_path: false
+      - type: bind
+        source: ${PWD:?run this compose file from the repository
+          root}/devnet/runtime/lighthouse-testnet
+        target: /testnet
+        read_only: true
+        bind:
+          create_host_path: false
+      - type: bind
+        source: ${PWD:?run this compose file from the repository
+          root}/devnet/runtime/jwt
+        target: /jwt
+        read_only: true
+        bind:
+          create_host_path: false
+    ports:
+      - "127.0.0.1:5052:5052"
+    logging: *log-local
+
+  lighthouse-validator:
+    image: *lighthouse-image
+    restart: unless-stopped
+    command:
+      - lighthouse
+      - validator_client
+      - --datadir=/data
+      - --testnet-dir=/testnet
+      - --beacon-nodes=http://lighthouse-beacon:5052
+      - --suggested-fee-recipient=0x1000000000000000000000000000000000000001
+    depends_on:
+      lighthouse-beacon:
+        condition: service_started
+    volumes:
+      - type: bind
+        source: ${PWD:?run this compose file from the repository
+          root}/devnet/runtime/lighthouse/validator
+        target: /data
+        bind:
+          create_host_path: false
+      - type: bind
+        source: ${PWD:?run this compose file from the repository
+          root}/devnet/runtime/lighthouse-testnet
+        target: /testnet
+        read_only: true
+        bind:
+          create_host_path: false
+    logging: *log-local

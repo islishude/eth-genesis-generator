@@ -1,0 +1,73 @@
+# Run from the repository root:
+#   docker compose -f example/docker-compose.init.yml up --build --abort-on-container-exit
+#
+# This builds the current eth-genesis-generator image, regenerates ./devnet,
+# and prepares runtime data consumed by example/docker-compose.yml.
+
+name: devnet-genesis
+
+x-generator-image: &generator-image genesis-eth-generator:local
+x-generator-build: &generator-build
+  context: ..
+  dockerfile: Dockerfile
+x-alpine-image: &alpine-image alpine:3.23.4
+x-log-local: &log-local
+  driver: local
+
+services:
+  config:
+    image: *generator-image
+    build: *generator-build
+    restart: "no"
+    command:
+      - init
+      - --out
+      - /devnet
+      - --force
+    volumes:
+      - type: bind
+        source: ${PWD:?run this compose file from the repository root}/devnet
+        target: /devnet
+        bind:
+          create_host_path: true
+    logging: *log-local
+
+  sleep:
+    # it's for file syncing
+    image: *alpine-image
+    restart: "no"
+    command:
+      - sh
+      - -ec
+      - "sleep 1"
+    depends_on:
+      config:
+        condition: service_completed_successfully
+    volumes:
+      - type: bind
+        source: ${PWD:?run this compose file from the repository root}/devnet
+        target: /devnet
+        bind:
+          create_host_path: true
+    logging: *log-local
+
+  artifacts:
+    image: *generator-image
+    build: *generator-build
+    restart: "no"
+    command:
+      - generate
+      - --config
+      - /devnet/genesis.yaml
+      - --out
+      - /devnet/artifacts
+    depends_on:
+      sleep:
+        condition: service_completed_successfully
+    volumes:
+      - type: bind
+        source: ${PWD:?run this compose file from the repository root}/devnet
+        target: /devnet
+        bind:
+          create_host_path: true
+    logging: *log-local
