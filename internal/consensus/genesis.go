@@ -94,20 +94,20 @@ func BuildGenesis(elGenesis *core.Genesis, clConfigPath string, mnemonicsPath st
 // ETH1BlockHash extracts eth1_data.block_hash across supported beacon state versions.
 func ETH1BlockHash(state *spec.VersionedBeaconState) (common.Hash, error) {
 	switch state.Version {
-	case spec.DataVersionPhase0:
-		return common.BytesToHash(state.Phase0.ETH1Data.BlockHash), nil
-	case spec.DataVersionAltair:
-		return common.BytesToHash(state.Altair.ETH1Data.BlockHash), nil
-	case spec.DataVersionBellatrix:
-		return common.BytesToHash(state.Bellatrix.ETH1Data.BlockHash), nil
-	case spec.DataVersionCapella:
-		return common.BytesToHash(state.Capella.ETH1Data.BlockHash), nil
-	case spec.DataVersionDeneb:
-		return common.BytesToHash(state.Deneb.ETH1Data.BlockHash), nil
-	case spec.DataVersionElectra:
-		return common.BytesToHash(state.Electra.ETH1Data.BlockHash), nil
 	case spec.DataVersionFulu:
 		return common.BytesToHash(state.Fulu.ETH1Data.BlockHash), nil
+	case spec.DataVersionElectra:
+		return common.BytesToHash(state.Electra.ETH1Data.BlockHash), nil
+	case spec.DataVersionDeneb:
+		return common.BytesToHash(state.Deneb.ETH1Data.BlockHash), nil
+	case spec.DataVersionCapella:
+		return common.BytesToHash(state.Capella.ETH1Data.BlockHash), nil
+	case spec.DataVersionBellatrix:
+		return common.BytesToHash(state.Bellatrix.ETH1Data.BlockHash), nil
+	case spec.DataVersionAltair:
+		return common.BytesToHash(state.Altair.ETH1Data.BlockHash), nil
+	case spec.DataVersionPhase0:
+		return common.BytesToHash(state.Phase0.ETH1Data.BlockHash), nil
 	default:
 		return common.Hash{}, fmt.Errorf("unsupported beacon state version %s", state.Version)
 	}

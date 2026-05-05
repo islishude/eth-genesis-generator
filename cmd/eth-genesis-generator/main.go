@@ -183,8 +183,7 @@ func runInit(ctx *cli.Context, stdout io.Writer) error {
 	cfg.Consensus.WithdrawalAddress = ctx.String("withdrawal-address")
 	cfg.Consensus.WithdrawalPrefix = ctx.String("withdrawal-prefix")
 	cfg.Consensus.DepositContractAddress = ctx.String("deposit-contract-address")
-	outputJSON := ctx.Bool("output-json")
-	cfg.Consensus.OutputJSON = &outputJSON
+	cfg.Consensus.OutputJSON = new(ctx.Bool("output-json"))
 
 	if ctx.IsSet("prefund") {
 		prefund, err := appconfig.ParsePrefundEntries(ctx.StringSlice("prefund"))

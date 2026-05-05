@@ -173,8 +173,7 @@ func (c *Config) ApplyDefaults(now time.Time) {
 		c.Consensus.DepositContractAddress = DefaultDepositContractAddress
 	}
 	if c.Consensus.OutputJSON == nil {
-		enabled := true
-		c.Consensus.OutputJSON = &enabled
+		c.Consensus.OutputJSON = new(true)
 	}
 	if c.Consensus.ForkVersions != nil {
 		normalized := make(map[string]string, len(c.Consensus.ForkVersions))

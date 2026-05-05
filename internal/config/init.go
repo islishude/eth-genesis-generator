@@ -18,7 +18,6 @@ const (
 
 // DefaultInitConfig returns the deterministic starter config written by init.
 func DefaultInitConfig() *Config {
-	outputJSON := true
 	return &Config{
 		Network: NetworkConfig{
 			Name:        DefaultNetworkName,
@@ -42,7 +41,7 @@ func DefaultInitConfig() *Config {
 			WithdrawalAddress:      DefaultWithdrawalAddress,
 			WithdrawalPrefix:       DefaultWithdrawalPrefix,
 			DepositContractAddress: DefaultDepositContractAddress,
-			OutputJSON:             &outputJSON,
+			OutputJSON:             new(true),
 		},
 	}
 }
