@@ -110,6 +110,10 @@ func initFlags() []cli.Flag {
 			Usage: "execution genesis base fee per gas as a decimal string",
 			Value: appconfig.DefaultBaseFeePerGas,
 		},
+		&cli.StringFlag{
+			Name:  "execution-contracts",
+			Usage: fmt.Sprintf("execution contract predeploy profiles; comma-separated supported profiles: %s", appconfig.SupportedExecutionContractProfiles()),
+		},
 		&cli.StringSliceFlag{
 			Name:  "prefund",
 			Usage: "prefunded execution account as ADDRESS=AMOUNT; repeatable",
@@ -185,6 +189,13 @@ func runInit(ctx *cli.Context, stdout io.Writer) error {
 	cfg.Consensus.DepositContractAddress = ctx.String("deposit-contract-address")
 	cfg.Consensus.OutputJSON = new(ctx.Bool("output-json"))
 
+	if ctx.IsSet("execution-contracts") {
+		contracts, err := appconfig.ParseExecutionContractProfiles(ctx.String("execution-contracts"))
+		if err != nil {
+			return err
+		}
+		cfg.Execution.Contracts = contracts
+	}
 	if ctx.IsSet("prefund") {
 		prefund, err := appconfig.ParsePrefundEntries(ctx.StringSlice("prefund"))
 		if err != nil {

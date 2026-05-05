@@ -8,14 +8,6 @@ import (
 	"unicode"
 )
 
-const (
-	// DefaultPrefundAddress is funded in starter execution genesis configs.
-	DefaultPrefundAddress = DefaultWithdrawalAddress
-
-	// DefaultPrefundBalanceWei is the starter balance for DefaultPrefundAddress.
-	DefaultPrefundBalanceWei = "1000000000000000000000000000"
-)
-
 // DefaultInitConfig returns the deterministic starter config written by init.
 func DefaultInitConfig() *Config {
 	return &Config{
@@ -28,9 +20,8 @@ func DefaultInitConfig() *Config {
 			GasLimit:      DefaultGasLimit,
 			ExtraData:     "0x",
 			BaseFeePerGas: DefaultBaseFeePerGas,
-			Prefund: map[string]string{
-				DefaultPrefundAddress: DefaultPrefundBalanceWei,
-			},
+			Contracts:     nil,
+			Prefund:       map[string]string{},
 		},
 		Consensus: ConsensusConfig{
 			Fork:                   DefaultFork,
@@ -91,6 +82,15 @@ func RenderInitYAML(c *Config) string {
 	fmt.Fprintf(&b, "  gas_limit: %d\n", c.Execution.GasLimit)
 	fmt.Fprintf(&b, "  extra_data: %s\n", yamlQuote(c.Execution.ExtraData))
 	fmt.Fprintf(&b, "  base_fee_per_gas: %s\n", yamlQuote(c.Execution.BaseFeePerGas))
+	fmt.Fprintf(&b, "  # Optional predeploy profiles: %s.\n", SupportedExecutionContractProfiles())
+	if len(c.Execution.Contracts) == 0 {
+		fmt.Fprintln(&b, "  contracts: []")
+	} else {
+		fmt.Fprintln(&b, "  contracts:")
+		for _, profile := range c.Execution.Contracts {
+			fmt.Fprintf(&b, "    - %s\n", yamlPlainOrQuote(profile))
+		}
+	}
 	if len(c.Execution.Prefund) == 0 {
 		fmt.Fprintln(&b, "  prefund: {}")
 	} else {

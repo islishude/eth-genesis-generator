@@ -58,11 +58,11 @@ func TestRunInitWritesDefaultConfigOnly(t *testing.T) {
 	if cfg.Execution.BaseFeePerGas != appconfig.DefaultBaseFeePerGas {
 		t.Fatalf("base fee per gas = %q", cfg.Execution.BaseFeePerGas)
 	}
-	if len(cfg.Execution.Prefund) != 1 {
-		t.Fatalf("prefund len = %d", len(cfg.Execution.Prefund))
+	if len(cfg.Execution.Contracts) != 0 {
+		t.Fatalf("execution contracts = %#v", cfg.Execution.Contracts)
 	}
-	if cfg.Execution.Prefund[appconfig.DefaultPrefundAddress] != appconfig.DefaultPrefundBalanceWei {
-		t.Fatalf("default prefund = %#v", cfg.Execution.Prefund)
+	if len(cfg.Execution.Prefund) != 0 {
+		t.Fatalf("prefund len = %d", len(cfg.Execution.Prefund))
 	}
 	if cfg.Consensus.Fork != appconfig.DefaultFork {
 		t.Fatalf("fork = %q", cfg.Consensus.Fork)
@@ -107,6 +107,7 @@ func TestRunInitFlagOverrides(t *testing.T) {
 		"--genesis-time", "1700000100",
 		"--gas-limit", "123456",
 		"--base-fee-per-gas", "42",
+		"--execution-contracts", "system,utils",
 		"--prefund", "0x1000000000000000000000000000000000000002=10",
 		"--prefund", "0x1000000000000000000000000000000000000003=20",
 		"--fork", "deneb",
@@ -148,11 +149,78 @@ func TestRunInitFlagOverrides(t *testing.T) {
 	if cfg.Execution.Prefund["0x1000000000000000000000000000000000000003"] != "20" {
 		t.Fatalf("prefund = %#v", cfg.Execution.Prefund)
 	}
-	if cfg.Execution.Prefund[appconfig.DefaultPrefundAddress] != "" {
-		t.Fatalf("default prefund should be replaced: %#v", cfg.Execution.Prefund)
+	if len(cfg.Execution.Contracts) != 2 ||
+		cfg.Execution.Contracts[0] != appconfig.ExecutionContractsProfileSystem ||
+		cfg.Execution.Contracts[1] != appconfig.ExecutionContractsProfileUtils {
+		t.Fatalf("execution contracts = %#v", cfg.Execution.Contracts)
 	}
 	if cfg.OutputJSONEnabled() {
 		t.Fatal("expected output_json=false")
+	}
+}
+
+func TestRunInitExecutionContractProfiles(t *testing.T) {
+	tests := []struct {
+		name  string
+		value string
+		want  []string
+	}{
+		{
+			name:  "system",
+			value: "system",
+			want:  []string{appconfig.ExecutionContractsProfileSystem},
+		},
+		{
+			name:  "utils",
+			value: "utils",
+			want:  []string{appconfig.ExecutionContractsProfileUtils},
+		},
+		{
+			name:  "all",
+			value: "all",
+			want:  []string{appconfig.ExecutionContractsProfileAll},
+		},
+		{
+			name:  "none",
+			value: "none",
+			want:  nil,
+		},
+		{
+			name:  "comma separated",
+			value: "system,utils",
+			want: []string{
+				appconfig.ExecutionContractsProfileSystem,
+				appconfig.ExecutionContractsProfileUtils,
+			},
+		},
+		{
+			name:  "normalized",
+			value: " System , Utils ",
+			want: []string{
+				appconfig.ExecutionContractsProfileSystem,
+				appconfig.ExecutionContractsProfileUtils,
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			outDir := t.TempDir()
+			code, _, stderr := runCLI("init", "--out", outDir, "--execution-contracts", tt.value)
+			if code != 0 {
+				t.Fatalf("exit code %d, stderr: %s", code, stderr)
+			}
+
+			cfg := readInitConfig(t, outDir)
+			if len(cfg.Execution.Contracts) != len(tt.want) {
+				t.Fatalf("execution contracts = %#v, want %#v", cfg.Execution.Contracts, tt.want)
+			}
+			for i := range tt.want {
+				if cfg.Execution.Contracts[i] != tt.want[i] {
+					t.Fatalf("execution contracts = %#v, want %#v", cfg.Execution.Contracts, tt.want)
+				}
+			}
+		})
 	}
 }
 
@@ -216,6 +284,26 @@ func TestRunInitValidationErrors(t *testing.T) {
 				"--prefund", "0x1000000000000000000000000000000000000002=2",
 			},
 			wantStderr: "duplicate prefund address",
+		},
+		{
+			name:       "unsupported execution contracts profile",
+			args:       []string{"--execution-contracts", "custom"},
+			wantStderr: "unsupported profile",
+		},
+		{
+			name:       "duplicate execution contracts profile",
+			args:       []string{"--execution-contracts", "system,System"},
+			wantStderr: "duplicate profile",
+		},
+		{
+			name:       "none combined with execution contracts profile",
+			args:       []string{"--execution-contracts", "none,system"},
+			wantStderr: "cannot be combined",
+		},
+		{
+			name:       "all combined with execution contracts profile",
+			args:       []string{"--execution-contracts", "all,utils"},
+			wantStderr: "cannot be combined",
 		},
 		{
 			name:       "invalid withdrawal address",

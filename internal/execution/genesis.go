@@ -23,7 +23,7 @@ func BuildGenesis(cfg *appconfig.Config) (*core.Genesis, error) {
 		return nil, err
 	}
 
-	alloc, err := buildAlloc(cfg.Execution.Prefund)
+	alloc, err := buildAlloc(cfg)
 	if err != nil {
 		return nil, err
 	}
@@ -50,19 +50,25 @@ func MarshalGenesis(genesis *core.Genesis) ([]byte, error) {
 	return json.MarshalIndent(genesis, "", "  ")
 }
 
-func buildAlloc(prefund map[string]string) (types.GenesisAlloc, error) {
-	alloc := make(types.GenesisAlloc, len(prefund))
-	addresses := make([]string, 0, len(prefund))
-	for address := range prefund {
+func buildAlloc(cfg *appconfig.Config) (types.GenesisAlloc, error) {
+	alloc := make(types.GenesisAlloc, len(cfg.Execution.Prefund)+len(cfg.Execution.Contracts))
+	if err := addContractProfiles(alloc, cfg); err != nil {
+		return nil, err
+	}
+
+	addresses := make([]string, 0, len(cfg.Execution.Prefund))
+	for address := range cfg.Execution.Prefund {
 		addresses = append(addresses, address)
 	}
 	sort.Strings(addresses)
 	for _, address := range addresses {
-		balance, err := appconfig.ParseBigInt(prefund[address])
+		balance, err := appconfig.ParseBigInt(cfg.Execution.Prefund[address])
 		if err != nil {
 			return nil, err
 		}
-		alloc[common.HexToAddress(address)] = types.Account{Balance: balance}
+		account := alloc[common.HexToAddress(address)]
+		account.Balance = balance
+		alloc[common.HexToAddress(address)] = account
 	}
 	return alloc, nil
 }

@@ -13,6 +13,17 @@ eth-genesis-generator init --out ./devnet
 eth-genesis-generator generate --config ./devnet/genesis.yaml --out ./artifacts
 ```
 
+By default `init` writes `execution.contracts: []`, so generated execution
+genesis files do not predeploy bundled contracts. To include optional predeploys
+from [internal/execution/contracts.md](./internal/execution/contracts.md), write
+one of the supported profiles into `genesis.yaml`:
+
+```bash
+eth-genesis-generator init --out ./devnet --execution-contracts system
+eth-genesis-generator init --out ./devnet --execution-contracts system,utils
+eth-genesis-generator init --out ./devnet --execution-contracts all
+```
+
 See [example.md](./example.md) for local Geth/Reth and Prysm/Lighthouse
 integration examples.
 

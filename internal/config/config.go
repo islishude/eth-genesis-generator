@@ -47,6 +47,18 @@ const (
 
 	// DefaultDepositContractAddress is referenced by EL and CL configs but is not predeployed.
 	DefaultDepositContractAddress = "0x4242424242424242424242424242424242424242"
+
+	// ExecutionContractsProfileSystem predeploys Ethereum system contracts.
+	ExecutionContractsProfileSystem = "system"
+
+	// ExecutionContractsProfileUtils predeploys auxiliary local devnet contracts.
+	ExecutionContractsProfileUtils = "utils"
+
+	// ExecutionContractsProfileAll predeploys all bundled execution contracts.
+	ExecutionContractsProfileAll = "all"
+
+	// ExecutionContractsProfileNone keeps execution genesis free of bundled contracts.
+	ExecutionContractsProfileNone = "none"
 )
 
 // Config is the root user-facing generator configuration.
@@ -77,6 +89,8 @@ type ExecutionConfig struct {
 	ExtraData string `yaml:"extra_data"`
 	// BaseFeePerGas is a non-negative decimal integer string.
 	BaseFeePerGas string `yaml:"base_fee_per_gas"`
+	// Contracts selects optional bundled execution contract predeploy profiles.
+	Contracts []string `yaml:"contracts,omitempty"`
 	// Prefund maps 0x-prefixed addresses to wei balances encoded as decimal strings.
 	Prefund map[string]string `yaml:"prefund,omitempty"`
 }
@@ -205,6 +219,11 @@ func (c *Config) Validate() error {
 	if _, err := ParseBigInt(c.Execution.BaseFeePerGas); err != nil {
 		return fmt.Errorf("execution.base_fee_per_gas: %w", err)
 	}
+	contracts, err := NormalizeExecutionContractProfiles(c.Execution.Contracts)
+	if err != nil {
+		return err
+	}
+	c.Execution.Contracts = contracts
 
 	addresses := make([]string, 0, len(c.Execution.Prefund))
 	for address := range c.Execution.Prefund {
