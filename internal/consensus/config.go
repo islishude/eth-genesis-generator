@@ -64,12 +64,6 @@ func RenderConfig(cfg *appconfig.Config) (string, error) {
 	}
 	fmt.Fprintf(&b, "GLOAS_FORK_VERSION: %s\n", derivedForkVersion(cfg.Network.ChainID, 0x07))
 	fmt.Fprintf(&b, "GLOAS_FORK_EPOCH: %d\n", farFutureEpoch)
-	fmt.Fprintf(&b, "EIP7441_FORK_VERSION: %s\n", derivedForkVersion(cfg.Network.ChainID, 0x08))
-	fmt.Fprintf(&b, "EIP7441_FORK_EPOCH: %d\n", farFutureEpoch)
-	fmt.Fprintf(&b, "EIP7805_FORK_VERSION: %s\n", derivedForkVersion(cfg.Network.ChainID, 0x0a))
-	fmt.Fprintf(&b, "EIP7805_FORK_EPOCH: %d\n", farFutureEpoch)
-	fmt.Fprintf(&b, "EIP7928_FORK_VERSION: %s\n", derivedForkVersion(cfg.Network.ChainID, 0x0b))
-	fmt.Fprintf(&b, "EIP7928_FORK_EPOCH: %d\n\n", farFutureEpoch)
 
 	writeChainSpec(&b, cfg)
 
@@ -165,6 +159,7 @@ func writeChainSpec(b *strings.Builder, cfg *appconfig.Config) {
 }
 
 func chainSpecForPreset(presetBase string) chainSpecValues {
+	//  https://github.com/ethereum/consensus-specs/blob/master/configs/minimal.yaml
 	if strings.EqualFold(presetBase, "minimal") {
 		return chainSpecValues{
 			SecondsPerSlot:                      6,
@@ -181,6 +176,7 @@ func chainSpecForPreset(presetBase string) chainSpecValues {
 		}
 	}
 
+	//  https://github.com/ethereum/consensus-specs/blob/master/configs/mainnet.yaml
 	return chainSpecValues{
 		SecondsPerSlot:                      12,
 		SlotDurationMS:                      12000,
