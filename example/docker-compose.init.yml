@@ -1,5 +1,5 @@
 # Run from the repository root:
-#   docker compose -f example/docker-compose.init.yml up --build --abort-on-container-exit
+#   docker compose -f example/docker-compose.init.yml up --abort-on-container-exit
 #
 # This builds the current eth-genesis-generator image, regenerates ./devnet,
 # and prepares runtime data consumed by example/docker-compose.yml.

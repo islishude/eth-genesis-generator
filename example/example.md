@@ -69,6 +69,12 @@ with the default template before generating artifacts. If you change
 `network.chain_id` in `genesis.yaml`, also update Reth's `--network-id` in
 `example/docker-compose.yml`.
 
+To stop the nodes:
+
+```bash
+docker compose -f example/docker-compose.yml down
+```
+
 ## Shared Local Setup
 
 Use the same JWT secret for the execution client auth RPC and the consensus
