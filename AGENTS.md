@@ -15,8 +15,7 @@ genesis artifacts:
 - `manifest.json`
 
 The default target is Fulu on the consensus layer and Osaka active at execution
-genesis. v1 uses pre-filled validators and does not predeploy deposit contract
-bytecode.
+genesis.
 
 ## Layout
 
