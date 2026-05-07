@@ -1,0 +1,125 @@
+# Run from the repository root:
+#   docker compose -f example/docker-compose.init.yml up --abort-on-container-exit
+#
+# This builds the current eth-genesis-generator image, regenerates ./devnet,
+# and prepares runtime data consumed by example/docker-compose.yml.
+
+name: devnet-init
+
+x-reth-image: &reth-image ghcr.io/paradigmxyz/reth:v2.2.0
+x-lighthouse-image: &lighthouse-image sigp/lighthouse:v8.1.3
+x-alpine-image: &alpine-image alpine:3.23.4
+x-log-local: &log-local
+  driver: local
+
+services:
+  jwt-init:
+    image: *alpine-image
+    restart: "no"
+    command:
+      - sh
+      - -ec
+      - |
+        mkdir -p /devnet/runtime/jwt
+        if [ ! -s /devnet/runtime/jwt/jwt.hex ]; then
+          dd if=/dev/urandom bs=32 count=1 2>/dev/null | od -An -tx1 -v | tr -d ' \n' > /devnet/runtime/jwt/jwt.hex
+          chmod 600 /devnet/runtime/jwt/jwt.hex
+          sleep 1
+        fi
+    volumes:
+      - type: bind
+        source: ${PWD:?run this compose file from the repository root}/devnet
+        target: /devnet
+        bind:
+          create_host_path: true
+    logging: *log-local
+
+  lighthouse-testnet-init:
+    image: *alpine-image
+    restart: "no"
+    command:
+      - sh
+      - -ec
+      - |
+        mkdir -p /devnet/runtime/lighthouse-testnet /devnet/runtime/lighthouse/beacon
+        cp /devnet/artifacts/consensus/config.yaml /devnet/runtime/lighthouse-testnet/config.yaml
+        cp /devnet/artifacts/consensus/genesis.ssz /devnet/runtime/lighthouse-testnet/genesis.ssz
+        printf "0\n" > /devnet/runtime/lighthouse-testnet/deposit_contract_block.txt
+        sleep 1
+    volumes:
+      - type: bind
+        source: ${PWD:?run this compose file from the repository root}/devnet
+        target: /devnet
+        bind:
+          create_host_path: true
+    logging: *log-local
+
+  reth-init:
+    image: *reth-image
+    restart: "no"
+    command:
+      - init
+      - --datadir=/data
+      - --chain=/config/genesis.json
+    depends_on:
+      jwt-init:
+        condition: service_completed_successfully
+    volumes:
+      - type: bind
+        source: ${PWD:?run this compose file from the repository
+          root}/devnet/runtime/reth
+        target: /data
+        bind:
+          create_host_path: true
+      - type: bind
+        source: ${PWD:?run this compose file from the repository
+          root}/devnet/artifacts/execution/genesis.json
+        target: /config/genesis.json
+        read_only: true
+        bind:
+          create_host_path: false
+    logging: *log-local
+
+  lighthouse-validator-import:
+    image: *lighthouse-image
+    restart: "no"
+    command:
+      - sh
+      - -ec
+      - |
+        mkdir -p /data
+        if [ ! -f /data/.validator-import-complete ]; then
+          lighthouse account validator import \
+            --datadir=/data \
+            --testnet-dir=/testnet \
+            --directory=/validator-keys \
+            --password-file=/validator-keys/password.txt \
+            --reuse-password
+          touch /data/.validator-import-complete
+          sleep 1
+        fi
+    depends_on:
+      lighthouse-testnet-init:
+        condition: service_completed_successfully
+    volumes:
+      - type: bind
+        source: ${PWD:?run this compose file from the repository
+          root}/devnet/runtime/lighthouse/validator
+        target: /data
+        bind:
+          create_host_path: true
+      - type: bind
+        source: ${PWD:?run this compose file from the repository
+          root}/devnet/runtime/lighthouse-testnet
+        target: /testnet
+        read_only: true
+        bind:
+          create_host_path: true
+      - type: bind
+        source: ${PWD:?run this compose file from the repository
+          root}/devnet/artifacts/validators/keystores
+        target: /validator-keys
+        read_only: true
+        bind:
+          create_host_path: true
+    logging: *log-local
