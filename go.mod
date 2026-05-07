@@ -8,7 +8,7 @@ require (
 	github.com/ethpandaops/go-eth2-client v0.1.1
 	github.com/google/uuid v1.6.0
 	github.com/tyler-smith/go-bip39 v1.1.0
-	github.com/urfave/cli/v2 v2.27.5
+	github.com/urfave/cli/v2 v2.27.7
 	github.com/wealdtech/go-eth2-types/v2 v2.8.2
 	github.com/wealdtech/go-eth2-util v1.8.2
 	github.com/wealdtech/go-eth2-wallet-encryptor-keystorev4 v1.1.3
@@ -34,7 +34,7 @@ require (
 	github.com/cockroachdb/redact v1.1.5 // indirect
 	github.com/cockroachdb/tokenbucket v0.0.0-20230807174530-cc333fc44b06 // indirect
 	github.com/consensys/gnark-crypto v0.18.1 // indirect
-	github.com/cpuguy83/go-md2man/v2 v2.0.5 // indirect
+	github.com/cpuguy83/go-md2man/v2 v2.0.7 // indirect
 	github.com/crate-crypto/go-eth-kzg v1.5.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/dchest/siphash v1.2.3 // indirect
