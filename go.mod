@@ -11,7 +11,7 @@ require (
 	github.com/urfave/cli/v2 v2.27.7
 	github.com/wealdtech/go-eth2-types/v2 v2.8.2
 	github.com/wealdtech/go-eth2-util v1.8.2
-	github.com/wealdtech/go-eth2-wallet-encryptor-keystorev4 v1.1.3
+	github.com/wealdtech/go-eth2-wallet-encryptor-keystorev4 v1.4.1
 	gopkg.in/yaml.v3 v3.0.1
 )
 
