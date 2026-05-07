@@ -24,7 +24,7 @@ eth-genesis-generator init --out ./devnet --execution-contracts system,utils
 eth-genesis-generator init --out ./devnet --execution-contracts all
 ```
 
-See [example.md](./example.md) for local Geth/Reth and Prysm/Lighthouse
+See [example.md](./example/example.md) for local Geth/Reth and Prysm/Lighthouse
 integration examples.
 
 ## Development
