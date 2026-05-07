@@ -4,7 +4,7 @@ go 1.26.2
 
 require (
 	github.com/ethereum/go-ethereum v1.17.2
-	github.com/ethpandaops/eth-beacon-genesis v0.0.2
+	github.com/ethpandaops/eth-beacon-genesis v0.0.3
 	github.com/ethpandaops/go-eth2-client v0.1.1
 	github.com/google/uuid v1.6.0
 	github.com/tyler-smith/go-bip39 v1.1.0
