@@ -8,13 +8,9 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-	"sync"
 
 	"github.com/google/uuid"
 	bip39 "github.com/tyler-smith/go-bip39"
-	e2types "github.com/wealdtech/go-eth2-types/v2"
-	e2util "github.com/wealdtech/go-eth2-util"
-	keystorev4 "github.com/wealdtech/go-eth2-wallet-encryptor-keystorev4"
 	"gopkg.in/yaml.v3"
 )
 
@@ -25,11 +21,6 @@ const (
 	PasswordRelPath = "validators/keystores/password.txt"
 )
 
-var (
-	initBLSOnce sync.Once
-	initBLSErr  error
-)
-
 type mnemonicSource struct {
 	Mnemonic string `yaml:"mnemonic"`
 	Start    uint64 `yaml:"start"`
@@ -37,12 +28,12 @@ type mnemonicSource struct {
 }
 
 type eip2335Keystore struct {
-	Crypto      map[string]any `json:"crypto"`
-	Description string         `json:"description,omitempty"`
-	Pubkey      string         `json:"pubkey,omitempty"`
-	Path        string         `json:"path"`
-	UUID        string         `json:"uuid"`
-	Version     int            `json:"version"`
+	Crypto      eip2335Crypto `json:"crypto"`
+	Description string        `json:"description,omitempty"`
+	Pubkey      string        `json:"pubkey,omitempty"`
+	Path        string        `json:"path"`
+	UUID        string        `json:"uuid"`
+	Version     int           `json:"version"`
 }
 
 // Result summarizes generated keystore artifact paths relative to the output root.
@@ -65,9 +56,6 @@ func Generate(mnemonicsPath string, outDir string, password string) (*Result, er
 	if password == "" {
 		return nil, fmt.Errorf("keystore password must not be empty")
 	}
-	if err := initBLS(); err != nil {
-		return nil, err
-	}
 
 	sources, err := loadMnemonicSources(mnemonicsPath)
 	if err != nil {
@@ -86,7 +74,6 @@ func Generate(mnemonicsPath string, outDir string, password string) (*Result, er
 	result := &Result{
 		PasswordPath: PasswordRelPath,
 	}
-	encryptor := keystorev4.New()
 
 	for _, source := range sources {
 		seed, err := seedFromMnemonic(source.Mnemonic)
@@ -96,12 +83,12 @@ func Generate(mnemonicsPath string, outDir string, password string) (*Result, er
 		for offset := uint64(0); offset < source.Count; offset++ {
 			validatorIndex := source.Start + offset
 			path := ValidatorKeyPath(validatorIndex)
-			signingKey, err := e2util.PrivateKeyFromSeedAndPath(seed, path)
+			signingKey, err := deriveValidatorKey(seed, path)
 			if err != nil {
 				return nil, fmt.Errorf("derive validator key %d: %w", validatorIndex, err)
 			}
 
-			crypto, err := encryptor.Encrypt(signingKey.Marshal(), password)
+			crypto, err := encryptSecret(signingKey.secret, password)
 			if err != nil {
 				return nil, fmt.Errorf("encrypt validator key %d: %w", validatorIndex, err)
 			}
@@ -113,7 +100,7 @@ func Generate(mnemonicsPath string, outDir string, password string) (*Result, er
 			keystore := eip2335Keystore{
 				Crypto:      crypto,
 				Description: fmt.Sprintf("eth-genesis-generator validator %d", validatorIndex),
-				Pubkey:      hex.EncodeToString(signingKey.PublicKey().Marshal()),
+				Pubkey:      hex.EncodeToString(signingKey.pubkey),
 				Path:        path,
 				UUID:        id.String(),
 				Version:     4,
@@ -141,13 +128,6 @@ func Generate(mnemonicsPath string, outDir string, password string) (*Result, er
 // ValidatorKeyPath returns the ERC-2334 signing key path used by eth-beacon-genesis.
 func ValidatorKeyPath(index uint64) string {
 	return fmt.Sprintf("m/12381/3600/%d/0/0", index)
-}
-
-func initBLS() error {
-	initBLSOnce.Do(func() {
-		initBLSErr = e2types.InitBLS()
-	})
-	return initBLSErr
 }
 
 func loadMnemonicSources(path string) ([]mnemonicSource, error) {

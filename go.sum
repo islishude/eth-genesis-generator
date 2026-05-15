@@ -370,10 +370,6 @@ github.com/wealdtech/go-eth2-types/v2 v2.8.2 h1:b5aXlNBLKgjAg/Fft9VvGlqAUCQMP5Lz
 github.com/wealdtech/go-eth2-types/v2 v2.8.2/go.mod h1:IAz9Lz1NVTaHabQa+4zjk2QDKMv8LVYo0n46M9o/TXw=
 github.com/wealdtech/go-eth2-util v1.8.2 h1:gq+JMrnadifyKadUr75wmfP7+usiqMu9t3VVoob5Dvo=
 github.com/wealdtech/go-eth2-util v1.8.2/go.mod h1:/80GAK0K/3+PqUBZHvaOPd3b1sjHeimxQh1nrJzgaPk=
-github.com/wealdtech/go-eth2-wallet-encryptor-keystorev4 v1.4.1 h1:9j7bpwjT9wmwBb54ZkBhTm1uNIlFFcCJXefd/YskZPw=
-github.com/wealdtech/go-eth2-wallet-encryptor-keystorev4 v1.4.1/go.mod h1:+tI1VD76E1WINI+Nstg7RVGpUolL5ql10nu2YztMO/4=
-github.com/wealdtech/go-eth2-wallet-types/v2 v2.11.0 h1:yX9+FfUXvPDvZ8Q5bhF+64AWrQwh4a3/HpfTx99DnZc=
-github.com/wealdtech/go-eth2-wallet-types/v2 v2.11.0/go.mod h1:UVP9YFcnPiIzHqbmCMW3qrQ3TK5FOqr1fmKqNT9JGr8=
 github.com/xrash/smetrics v0.0.0-20240521201337-686a1a2994c1 h1:gEOO8jv9F4OT7lGCjxCBTO/36wtF6j2nSip77qHd4x4=
 github.com/xrash/smetrics v0.0.0-20240521201337-686a1a2994c1/go.mod h1:Ohn+xnUBiLI6FVj/9LpzZWtj1/D6lUovWYBkxHVV3aM=
 github.com/yuin/goldmark v1.1.27/go.mod h1:3hX8gzYuyVAZsxl0MRgGTJEmQBFcNTphYh9decYSb74=
