@@ -1,7 +1,9 @@
 package keystores
 
 import (
+	"crypto/hmac"
 	"crypto/rand"
+	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
@@ -48,6 +50,7 @@ func GeneratePassword() (string, error) {
 	if _, err := rand.Read(password); err != nil {
 		return "", err
 	}
+	password = hmac.New(sha256.New, password).Sum(nil)
 	return hex.EncodeToString(password), nil
 }
 
