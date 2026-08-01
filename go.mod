@@ -7,7 +7,7 @@ require (
 	github.com/ethpandaops/eth-beacon-genesis v0.0.5
 	github.com/ethpandaops/go-eth2-client v0.1.5
 	github.com/google/uuid v1.6.0
-	github.com/supranational/blst v0.3.16
+	github.com/supranational/blst v0.3.17
 	github.com/tyler-smith/go-bip39 v1.1.0
 	github.com/urfave/cli/v2 v2.27.7
 	golang.org/x/crypto v0.51.0
