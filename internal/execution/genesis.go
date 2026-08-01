@@ -100,11 +100,10 @@ func buildChainConfig(cfg *appconfig.Config) *params.ChainConfig {
 		PragueTime:             new(uint64(0)),
 		OsakaTime:              new(uint64(0)),
 		DepositContractAddress: common.HexToAddress(cfg.Consensus.DepositContractAddress),
-		Ethash:                 new(params.EthashConfig),
+		Ethash:                 nil,
 		BlobScheduleConfig: &params.BlobScheduleConfig{
 			Cancun: params.DefaultCancunBlobConfig,
 			Prague: params.DefaultPragueBlobConfig,
-			Osaka:  params.DefaultOsakaBlobConfig,
 		},
 	}
 }
