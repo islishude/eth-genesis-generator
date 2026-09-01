@@ -4,7 +4,7 @@ go 1.26.2
 
 require (
 	github.com/ethereum/go-ethereum v1.17.5
-	github.com/ethpandaops/eth-beacon-genesis v0.0.5
+	github.com/ethpandaops/eth-beacon-genesis v0.0.7
 	github.com/ethpandaops/go-eth2-client v0.1.6
 	github.com/google/uuid v1.6.0
 	github.com/supranational/blst v0.3.17
@@ -124,7 +124,7 @@ require (
 	github.com/rs/zerolog v1.32.0 // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	github.com/shirou/gopsutil v3.21.4-0.20210419000835-c7a38de76ee5+incompatible // indirect
-	github.com/sirupsen/logrus v1.9.4 // indirect
+	github.com/sirupsen/logrus v1.10.1 // indirect
 	github.com/status-im/keycard-go v0.2.0 // indirect
 	github.com/syndtr/goleveldb v1.0.1-0.20210819022825-2ae1ddf74ef7 // indirect
 	github.com/tklauser/go-sysconf v0.3.12 // indirect
