@@ -96,8 +96,8 @@ github.com/ethereum/go-ethereum v1.17.6 h1:27mdzjoN/bjz+rgjjZPGnD6E44W/Nd+vG+FKQ
 github.com/ethereum/go-ethereum v1.17.6/go.mod h1:nl9wZjMuIjAottU6bq82UihXPbyY0jHHwkYXhnYhmU4=
 github.com/ethereum/hid v1.0.1-0.20260421154323-c2ab8d9bf68a h1:eIFUceK3U/z9UV0D/kAI6cxA27eH7MPqt2ks7fbzj/k=
 github.com/ethereum/hid v1.0.1-0.20260421154323-c2ab8d9bf68a/go.mod h1:nABYy4hsKZpuN0mu0uybdjrIOuGb1eE7b1lci/ezUAo=
-github.com/ethpandaops/eth-beacon-genesis v0.0.5 h1:gSciE5EdXtoo4YUI+PSoOmZSS97Zgrjj4G3i32n3+IU=
-github.com/ethpandaops/eth-beacon-genesis v0.0.5/go.mod h1:6ev1YMyRpCN6jnNOz+aGNo7pMA3hdgAC47mkzwB72V4=
+github.com/ethpandaops/eth-beacon-genesis v0.0.8 h1:GI5R5j3JSQ+zbjA+05gtRJbsi2PZ+wSyIsE37XTxack=
+github.com/ethpandaops/eth-beacon-genesis v0.0.8/go.mod h1:ANiayjZaTIgb+L57IPPSKwMGe9w9hy26QWPVKJcnaKY=
 github.com/ethpandaops/go-eth2-client v0.1.12 h1:lzEFyXR3Jk9Ki5oAjOsWn0FoN0Nao8SK4df0hzw2oJs=
 github.com/ethpandaops/go-eth2-client v0.1.12/go.mod h1:sIVbaug0GsltsJS+hj8ID4dmWBIt8TXoNIesvuBCGt0=
 github.com/fatih/color v1.18.0 h1:S8gINlzdQ840/4pfAwic/ZE0djQEH3wM94VfqLTZcOM=
@@ -332,8 +332,8 @@ github.com/russross/blackfriday/v2 v2.1.0 h1:JIOH55/0cWyOuilr9/qlrm0BSXldqnqwMsf
 github.com/russross/blackfriday/v2 v2.1.0/go.mod h1:+Rmxgy9KzJVeS9/2gXHxylqXiyQDYRxCVz55jmeOWTM=
 github.com/shirou/gopsutil v3.21.4-0.20210419000835-c7a38de76ee5+incompatible h1:Bn1aCHHRnjv4Bl16T8rcaFjYSrGrIZvpiGO6P3Q4GpU=
 github.com/shirou/gopsutil v3.21.4-0.20210419000835-c7a38de76ee5+incompatible/go.mod h1:5b4v6he4MtMOwMlS0TUMTu2PcXUg8+E1lC7eC3UO/RA=
-github.com/sirupsen/logrus v1.9.4 h1:TsZE7l11zFCLZnZ+teH4Umoq5BhEIfIzfRDZ1Uzql2w=
-github.com/sirupsen/logrus v1.9.4/go.mod h1:ftWc9WdOfJ0a92nsE2jF5u5ZwH8Bv2zdeOC42RjbV2g=
+github.com/sirupsen/logrus v1.10.2 h1:G2SED73/qrAu6YwbdxOD6peLkCBI3z7L+ykJFTXJBBo=
+github.com/sirupsen/logrus v1.10.2/go.mod h1:SLEg8TqYulVKKfIGHldVp2K2aYz2DKSVBq4g/H5bR7Q=
 github.com/status-im/keycard-go v0.2.0 h1:QDLFswOQu1r5jsycloeQh3bVU8n/NatHHaZobtDnDzA=
 github.com/status-im/keycard-go v0.2.0/go.mod h1:wlp8ZLbsmrF6g6WjugPAx+IzoLrkdf9+mHxBEeo3Hbg=
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
