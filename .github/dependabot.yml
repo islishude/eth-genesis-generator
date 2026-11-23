@@ -18,3 +18,12 @@ updates:
     directory: /
     schedule:
       interval: monthly
+
+  - package-ecosystem: docker-compose
+    directories:
+      - /example
+    groups:
+      compose-images:
+        patterns: ["*"]
+    schedule:
+      interval: monthly
