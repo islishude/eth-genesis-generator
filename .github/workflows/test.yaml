@@ -26,3 +26,21 @@ jobs:
       - run: make check
       - run: make lint
       - run: make test
+
+  image-build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+      - name: Build
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          push: false
+          tags: ethgen:ci
+          load: true
+          cache-from: type=gha,scope=test-${{ runner.os }}-${{ runner.arch }}
+          cache-to: type=gha,mode=max,scope=test-${{ runner.os }}-${{ runner.arch }}
+      - name: Verify Docker image
+        run: |
+          docker run --name test --rm ethgen:ci --help
