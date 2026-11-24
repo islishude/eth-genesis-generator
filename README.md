@@ -13,6 +13,17 @@ eth-genesis-generator init --out ./devnet
 eth-genesis-generator generate --config ./devnet/genesis.yaml --out ./artifacts
 ```
 
+To activate Glamsterdam at genesis (Gloas on consensus and Amsterdam on execution),
+select `--fork gloas` or set `consensus.fork: gloas` in `genesis.yaml`:
+
+```bash
+eth-genesis-generator init --fork gloas --out ./glamsterdam
+eth-genesis-generator generate --config ./glamsterdam/genesis.yaml --out ./artifacts
+```
+
+For Gloas, `init --execution-contracts system` also includes the EIP-8282
+builder deposit and exit contracts. The `all` profile includes them as well.
+
 By default `init` writes `execution.contracts: []`, so generated execution
 genesis files do not predeploy bundled contracts. To include optional predeploys
 from [internal/execution/contracts.md](./internal/execution/contracts.md), write

@@ -75,7 +75,7 @@ func buildAlloc(cfg *appconfig.Config) (types.GenesisAlloc, error) {
 }
 
 func buildChainConfig(cfg *appconfig.Config) *params.ChainConfig {
-	return &params.ChainConfig{
+	chain := &params.ChainConfig{
 		ChainID: new(big.Int).SetUint64(cfg.Network.ChainID),
 		// Historical execution forks activate at block 0 for a post-merge devnet.
 		HomesteadBlock:          big.NewInt(0),
@@ -107,4 +107,8 @@ func buildChainConfig(cfg *appconfig.Config) *params.ChainConfig {
 			Prague: params.DefaultPragueBlobConfig,
 		},
 	}
+	if cfg.Consensus.Fork == "gloas" {
+		chain.AmsterdamTime = new(uint64(0))
+	}
+	return chain
 }

@@ -126,6 +126,7 @@ func RenderInitYAML(c *Config) string {
 	fmt.Fprintln(&b, "  #   deneb: \"0x04007e7e\"")
 	fmt.Fprintln(&b, "  #   electra: \"0x05007e7e\"")
 	fmt.Fprintln(&b, "  #   fulu: \"0x06007e7e\"")
+	fmt.Fprintln(&b, "  #   gloas: \"0x07007e7e\"")
 
 	return b.String()
 }

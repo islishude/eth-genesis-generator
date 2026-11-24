@@ -13,6 +13,13 @@ bundled execution contract predeploys.
 - 0x0000BBdDc7CE488642fb579F8B00f3a590007251 [EIP-7251](https://eips.ethereum.org/EIPS/eip-7251) Increase the MAX_EFFECTIVE_BALANCE
 - 0x00000961Ef480Eb55e80D19ad83579A64c007002 [EIP-7002](https://eips.ethereum.org/EIPS/eip-7002) Execution layer triggerable withdrawals
 
+With `--fork gloas`, the `system` and `all` profiles also predeploy the following
+[EIP-8282 contracts](https://eips.ethereum.org/EIPS/eip-8282). Their runtime code,
+initial nonce (1), and balance (0 ETH before prefunding) are stored in [contracts.json](./contracts.json).
+
+- `0x0000BFF46984E3725691FA540A8C7589300D8282` — Builder deposit contract
+- `0x000064D678505AD48F8CCB093BC65613800E8282` — Builder exit contract
+
 ### Utils
 
 - 0x4e59b44847b379578588920ca78fbf26c0b4956c [DeterministicCreate2Deployer](https://github.com/Arachnid/deterministic-deployment-proxy)

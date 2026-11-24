@@ -13,6 +13,7 @@ var forkOrder = []string{
 	"deneb",
 	"electra",
 	"fulu",
+	"gloas",
 }
 
 // SupportedForks returns the ordered set of consensus forks supported by the generator.
