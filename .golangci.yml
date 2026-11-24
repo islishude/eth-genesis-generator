@@ -23,6 +23,10 @@ linters:
         linters:
           - gocognit
           - gosec
+      # Test fixtures can contain intentional repetitions, such as BIP-39 vectors.
+      - path: _test\.go$
+        linters:
+          - dupword
   settings:
     dupl:
       threshold: 100
