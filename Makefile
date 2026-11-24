@@ -34,13 +34,10 @@ lint:
 	golangci-lint run --timeout 10m
 
 format:
-	gofmt -w -s .
-	go fix ./...
-	go mod tidy
+	golangci-lint fmt
 
 check:
-	gofmt -d .
-	go fix -diff ./...
+	golangci-lint fmt -d .
 	go mod tidy -diff 
 
 smoke:
