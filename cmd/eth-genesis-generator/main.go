@@ -8,9 +8,10 @@ import (
 	"strings"
 	"time"
 
+	"github.com/urfave/cli/v2"
+
 	"github.com/islishude/eth-genesis-generator/internal/artifacts"
 	appconfig "github.com/islishude/eth-genesis-generator/internal/config"
-	"github.com/urfave/cli/v2"
 )
 
 func main() {

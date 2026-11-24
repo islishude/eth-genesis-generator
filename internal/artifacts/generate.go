@@ -6,11 +6,12 @@ import (
 	"path/filepath"
 	"time"
 
+	bip39 "github.com/tyler-smith/go-bip39"
+
 	appconfig "github.com/islishude/eth-genesis-generator/internal/config"
 	"github.com/islishude/eth-genesis-generator/internal/consensus"
 	"github.com/islishude/eth-genesis-generator/internal/execution"
 	"github.com/islishude/eth-genesis-generator/internal/keystores"
-	bip39 "github.com/tyler-smith/go-bip39"
 )
 
 // Generate writes all genesis artifacts into outDir and returns their manifest metadata.

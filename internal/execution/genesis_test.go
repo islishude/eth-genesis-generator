@@ -8,6 +8,7 @@ import (
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core"
+
 	appconfig "github.com/islishude/eth-genesis-generator/internal/config"
 )
 

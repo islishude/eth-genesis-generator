@@ -18,7 +18,7 @@ import (
 )
 
 func TestGenerateKeystoresFromMnemonics(t *testing.T) {
-	const mnemonic = "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about"
+	const mnemonic = "abandon about"
 	const password = "test-password"
 
 	outDir := t.TempDir()

@@ -7,8 +7,9 @@ import (
 	"strings"
 	"testing"
 
-	appconfig "github.com/islishude/eth-genesis-generator/internal/config"
 	"gopkg.in/yaml.v3"
+
+	appconfig "github.com/islishude/eth-genesis-generator/internal/config"
 )
 
 func TestRunInitWritesDefaultConfigOnly(t *testing.T) {
@@ -98,7 +99,7 @@ func TestRunInitWritesDefaultConfigOnly(t *testing.T) {
 
 func TestRunInitFlagOverrides(t *testing.T) {
 	outDir := t.TempDir()
-	mnemonic := "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about"
+	mnemonic := "abandon about"
 	code, _, stderr := runCLI(
 		"init",
 		"--out", outDir,
