@@ -39,35 +39,27 @@ test.
 
 ## Docker Compose: Reth + Lighthouse
 
-The compose example builds the current repository image, writes
-`./devnet/genesis.yaml`, generates artifacts into `./devnet/artifacts`, prepares
-Reth/Lighthouse runtime data under `./devnet/runtime`, then starts a local
-Reth + Lighthouse devnet.
-
-Run the genesis compose file first:
+Run initialization once from the repository root with a fresh `./devnet`.
+The `genesis` service builds the generator and runs `all --out /devnet/artifacts`,
+placing `genesis.yaml`, the manifest, and client artifacts together.
+Reth initialization and Lighthouse validator import prepare `./devnet/runtime`.
 
 ```bash
-docker compose -f example/docker-compose.genesis.yml up --build --abort-on-container-exit
-docker compose -f example/docker-compose.genesis.yml down
-```
-
-Then run the initialization compose file:
-
-```bash
-docker compose -f example/docker-compose.init.yml up --abort-on-container-exit
+docker compose -f example/docker-compose.init.yml up --build --abort-on-container-failure
 docker compose -f example/docker-compose.init.yml down
 ```
 
-Then start the nodes:
+Start the nodes. Reth creates its JWT secret in its data directory. Lighthouse
+v8.3.3 reads the secret through a read-only mount and connects to the Engine
+API over the internal Compose network.
 
 ```bash
 docker compose -f example/docker-compose.yml up
 ```
 
-The genesis compose uses `init --force`, so it rewrites `./devnet/genesis.yaml`
-with the default template before generating artifacts. If you change
-`network.chain_id` in `genesis.yaml`, also update Reth's `--network-id` in
-`example/docker-compose.yml`.
+On later starts, run only the node Compose file to reuse the existing chain and
+validator keys. To choose a different chain ID for a fresh network, pass
+`--chain-id` to the genesis service and set Reth's `--network-id` to match.
 
 To stop the nodes:
 
