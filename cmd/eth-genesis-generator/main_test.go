@@ -99,7 +99,7 @@ func TestRunInitWritesDefaultConfigOnly(t *testing.T) {
 
 func TestRunInitFlagOverrides(t *testing.T) {
 	outDir := t.TempDir()
-	mnemonic := "abandon about"
+	mnemonic := "legal winner thank year wave sausage worth useful legal winner thank yellow"
 	code, _, stderr := runCLI(
 		"init",
 		"--out", outDir,

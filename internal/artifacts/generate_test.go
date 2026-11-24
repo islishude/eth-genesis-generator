@@ -15,7 +15,7 @@ func TestGenerateArtifacts(t *testing.T) {
 	cfg.ApplyDefaults(time.Unix(1_700_000_000, 0))
 	cfg.Network.GenesisTime = 1_700_000_100
 	cfg.Consensus.ValidatorCount = 1
-	cfg.Consensus.Mnemonic = "abandon about"
+	cfg.Consensus.Mnemonic = "legal winner thank year wave sausage worth useful legal winner thank yellow"
 
 	outDir := t.TempDir()
 	manifest, err := Generate(&cfg, outDir, time.Unix(1_700_000_001, 0))
