@@ -9,7 +9,7 @@ import (
 	"testing"
 	"time"
 
-	"gopkg.in/yaml.v3"
+	"go.yaml.in/yaml/v4"
 
 	"github.com/islishude/eth-genesis-generator/internal/artifacts"
 	appconfig "github.com/islishude/eth-genesis-generator/internal/config"
