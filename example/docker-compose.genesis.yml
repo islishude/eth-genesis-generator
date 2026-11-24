@@ -10,7 +10,7 @@ x-generator-image: &generator-image genesis-eth-generator:local
 x-generator-build: &generator-build
   context: ..
   dockerfile: Dockerfile
-x-alpine-image: &alpine-image alpine:3.23.4
+x-alpine-image: &alpine-image alpine:3.24.4
 x-log-local: &log-local
   driver: local
 
