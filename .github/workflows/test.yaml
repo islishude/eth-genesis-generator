@@ -37,10 +37,13 @@ jobs:
         with:
           context: .
           push: false
-          tags: ethgen:ci
+          tags: ethgen:local
           load: true
           cache-from: type=gha,scope=test-${{ runner.os }}-${{ runner.arch }}
           cache-to: type=gha,mode=max,scope=test-${{ runner.os }}-${{ runner.arch }}
       - name: Verify Docker image
         run: |
-          docker run --name test --rm ethgen:ci --help
+          docker run --name test --rm ethgen:local --help
+      - name: Smoke test the Compose example
+        timeout-minutes: 10
+        run: bash example/smoke-test.sh --no-build
