@@ -1,9 +1,10 @@
 # eth-genesis-generator
 
-Generate matching execution and consensus genesis files for a local Ethereum
-proof-of-stake devnet, along with the keys for its genesis validators. The
-default configuration starts with Osaka on the execution layer and Fulu on the
-consensus layer, chain ID `32382`, and 64 validators with 32 ETH each.
+Use `ethgen` to generate matching execution and consensus genesis files for a
+local Ethereum proof-of-stake devnet, along with the keys for its genesis
+validators. The default configuration starts with Osaka on the execution layer
+and Fulu on the consensus layer, chain ID `32382`, and 64 validators with 32 ETH
+each.
 
 ## Quick start
 
@@ -11,7 +12,7 @@ From the repository root, build with Go 1.27.4 or later, Make, and a C compiler.
 
 ```sh
 make build
-./bin/eth-genesis-generator all --out ./devnet
+./bin/ethgen all --out ./devnet
 ```
 
 `all` writes the input configuration and every generated artifact to a new or
@@ -32,9 +33,9 @@ Use `init` to write a template, edit `genesis.yaml`, then pass it to
 `generate`.
 
 ```sh
-./bin/eth-genesis-generator init --out ./custom-devnet --chain-id 12345 \
+./bin/ethgen init --out ./custom-devnet --chain-id 12345 \
   --prefund 0x1000000000000000000000000000000000000001=1000000000000000000
-./bin/eth-genesis-generator generate \
+./bin/ethgen generate \
   --config ./custom-devnet/genesis.yaml --out ./artifacts
 ```
 
@@ -68,7 +69,7 @@ Select `--fork gloas` with `init` or `all`, or set `consensus.fork: gloas` in
 the execution layer at genesis. Use client builds that support those forks.
 
 ```sh
-./bin/eth-genesis-generator all --out ./glamsterdam --fork gloas \
+./bin/ethgen all --out ./glamsterdam --fork gloas \
   --execution-contracts system
 ```
 

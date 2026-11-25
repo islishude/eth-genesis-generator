@@ -1,5 +1,5 @@
-APP := eth-genesis-generator
-CMD := ./cmd/eth-genesis-generator
+APP := ethgen
+CMD := ./cmd/ethgen
 BIN_DIR := bin
 BIN := $(BIN_DIR)/$(APP)
 GO_PACKAGES := ./...
@@ -9,7 +9,7 @@ GO_PACKAGES := ./...
 help:
 	@printf '%s\n' \
 		'Targets:' \
-		'  build   Build the CLI into bin/eth-genesis-generator' \
+		'  build   Build the CLI into $(BIN)' \
 		'  test    Run Go tests' \
 		'  lint    Run go vet' \
 		'  format  Run gofmt on cmd and internal packages' \

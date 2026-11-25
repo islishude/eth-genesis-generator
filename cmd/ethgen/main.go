@@ -35,7 +35,7 @@ func run(args []string, stdout, stderr io.Writer) int {
 
 func newApp(stdout, stderr io.Writer) *cli.App {
 	return &cli.App{
-		Name:                 "eth-genesis-generator",
+		Name:                 "ethgen",
 		Usage:                "Generate local Ethereum PoS devnet genesis artifacts",
 		Writer:               stdout,
 		ErrWriter:            stderr,

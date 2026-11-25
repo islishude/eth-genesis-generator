@@ -1,7 +1,7 @@
 # Run from the repository root:
 #   docker compose -f example/docker-compose.init.yml up --build --abort-on-container-failure
 #
-# This builds the current eth-genesis-generator image, generates ./devnet/artifacts,
+# This builds the current ethgen image, generates ./devnet/artifacts,
 # and prepares runtime data consumed by example/docker-compose.yml.
 
 name: devnet-init
@@ -11,7 +11,7 @@ x-log-local: &log-local
 
 services:
   genesis:
-    image: genesis-eth-generator:local
+    image: ethgen:local
     build:
       context: ..
       dockerfile: Dockerfile
