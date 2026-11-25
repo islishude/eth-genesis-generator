@@ -5,8 +5,13 @@ import (
 	"strings"
 )
 
+const (
+	forkPhase0       = "phase0"
+	forkGenesisAlias = "genesis"
+)
+
 var forkOrder = []string{
-	"phase0",
+	forkPhase0,
 	"altair",
 	"bellatrix",
 	"capella",
@@ -26,8 +31,8 @@ func SupportedForks() []string {
 // ForkIndex returns a fork's activation order and accepts "genesis" as phase0.
 func ForkIndex(name string) (int, bool) {
 	name = strings.ToLower(name)
-	if name == "genesis" {
-		name = "phase0"
+	if name == forkGenesisAlias {
+		name = forkPhase0
 	}
 	for i, fork := range forkOrder {
 		if fork == name {
@@ -54,8 +59,8 @@ func ForkVersion(chainID uint64, fork string, overrides map[string]string) strin
 		if value, ok := overrides[strings.ToLower(fork)]; ok {
 			return strings.ToLower(value)
 		}
-		if fork == "phase0" {
-			if value, ok := overrides["genesis"]; ok {
+		if fork == forkPhase0 {
+			if value, ok := overrides[forkGenesisAlias]; ok {
 				return strings.ToLower(value)
 			}
 		}
@@ -68,7 +73,7 @@ func ForkVersion(chainID uint64, fork string, overrides map[string]string) strin
 
 // ForkVersionField maps a fork name to the consensus config version field.
 func ForkVersionField(fork string) string {
-	if fork == "phase0" {
+	if fork == forkPhase0 {
 		return "GENESIS_FORK_VERSION"
 	}
 	return strings.ToUpper(fork) + "_FORK_VERSION"
@@ -76,7 +81,7 @@ func ForkVersionField(fork string) string {
 
 // ForkEpochField maps a fork name to the consensus config epoch field.
 func ForkEpochField(fork string) string {
-	if fork == "phase0" {
+	if fork == forkPhase0 {
 		return ""
 	}
 	return strings.ToUpper(fork) + "_FORK_EPOCH"
@@ -84,7 +89,7 @@ func ForkEpochField(fork string) string {
 
 func forkFieldName(name string) (string, bool) {
 	name = strings.ToLower(name)
-	if name == "genesis" {
+	if name == forkGenesisAlias {
 		return "GENESIS_FORK_VERSION", true
 	}
 	if _, ok := ForkIndex(name); !ok {
