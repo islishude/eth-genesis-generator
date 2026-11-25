@@ -10,10 +10,10 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"uuid"
 
-	"github.com/google/uuid"
 	bip39 "github.com/tyler-smith/go-bip39"
-	"gopkg.in/yaml.v3"
+	"go.yaml.in/yaml/v4"
 )
 
 const (
@@ -95,17 +95,12 @@ func Generate(mnemonicsPath string, outDir string, password string) (*Result, er
 			if err != nil {
 				return nil, fmt.Errorf("encrypt validator key %d: %w", validatorIndex, err)
 			}
-			id, err := uuid.NewRandom()
-			if err != nil {
-				return nil, fmt.Errorf("generate validator key uuid: %w", err)
-			}
-
 			keystore := eip2335Keystore{
 				Crypto:      crypto,
 				Description: fmt.Sprintf("eth-genesis-generator validator %d", validatorIndex),
 				Pubkey:      hex.EncodeToString(signingKey.pubkey),
 				Path:        path,
-				UUID:        id.String(),
+				UUID:        uuid.NewV4().String(),
 				Version:     4,
 			}
 			data, err := json.MarshalIndent(keystore, "", "  ")

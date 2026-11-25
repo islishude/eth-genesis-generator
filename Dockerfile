@@ -7,6 +7,6 @@ WORKDIR /app
 COPY . .
 RUN --mount=type=cache,target=/go/pkg/mod --mount=type=cache,target=/root/.cache/go-build make install
 
-FROM gcr.io/distroless/cc-debian13:latest
+FROM gcr.io/distroless/base-debian13:latest
 COPY --from=compiler /go/bin/eth-genesis-generator /usr/local/bin/
 ENTRYPOINT [ "/usr/local/bin/eth-genesis-generator" ]

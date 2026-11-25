@@ -9,9 +9,35 @@ It does not predeploy the deposit contract bytecode in v1.
 ## Usage
 
 ```bash
+eth-genesis-generator all --out ./devnet
+```
+
+`all` writes `genesis.yaml`, `manifest.json`, and the execution, consensus, and
+validator artifacts together. The output directory defaults to `./devnet` and
+must be new or empty. Use the same configuration flags as `init`, for example
+`--fork gloas --chain-id 12345`. With the default settings, the template keeps
+`genesis_time: 0` and an empty mnemonic. Generation records the resolved time
+(current time plus 60 seconds) in the manifest and writes the generated mnemonic
+to `validators/mnemonics.yaml`.
+
+To edit the configuration before generating artifacts:
+
+```bash
 eth-genesis-generator init --out ./devnet
+# Edit ./devnet/genesis.yaml, then run:
 eth-genesis-generator generate --config ./devnet/genesis.yaml --out ./artifacts
 ```
+
+To activate Glamsterdam at genesis (Gloas on consensus and Amsterdam on execution),
+select `--fork gloas` or set `consensus.fork: gloas` in `genesis.yaml`:
+
+```bash
+eth-genesis-generator init --fork gloas --out ./glamsterdam
+eth-genesis-generator generate --config ./glamsterdam/genesis.yaml --out ./artifacts
+```
+
+For Gloas, `init --execution-contracts system` also includes the EIP-8282
+builder deposit and exit contracts. The `all` profile includes them as well.
 
 By default `init` writes `execution.contracts: []`, so generated execution
 genesis files do not predeploy bundled contracts. To include optional predeploys

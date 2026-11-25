@@ -1,6 +1,7 @@
 package execution
 
 import (
+	"bytes"
 	"encoding/json"
 	"math/big"
 	"testing"
@@ -8,6 +9,8 @@ import (
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core"
+	"github.com/ethereum/go-ethereum/core/types"
+	"github.com/ethereum/go-ethereum/params"
 
 	appconfig "github.com/islishude/eth-genesis-generator/internal/config"
 )
@@ -25,6 +28,9 @@ func TestBuildGenesisIsOsakaAtGenesis(t *testing.T) {
 
 	if genesis.Config.OsakaTime == nil || *genesis.Config.OsakaTime != 0 {
 		t.Fatalf("osaka time = %v", genesis.Config.OsakaTime)
+	}
+	if genesis.Config.AmsterdamTime != nil {
+		t.Fatal("Amsterdam active on default profile")
 	}
 	block := genesis.ToBlock()
 	if block.BlobGasUsed() == nil || block.ExcessBlobGas() == nil {
@@ -146,5 +152,34 @@ func TestBuildGenesisMapsDepositContractToConfiguredAddress(t *testing.T) {
 	}
 	if _, ok := genesis.Alloc[common.HexToAddress(appconfig.DefaultDepositContractAddress)]; ok {
 		t.Fatal("default deposit address should not be allocated when deposit address is customized")
+	}
+}
+
+func TestAmsterdamGenesis(t *testing.T) {
+	for _, profile := range []string{"none", "utils", "system", "all"} {
+		t.Run(profile, func(t *testing.T) {
+			var cfg appconfig.Config
+			cfg.ApplyDefaults(time.Unix(1_700_000_000, 0))
+			cfg.Consensus.Fork = "gloas"
+			cfg.Execution.Contracts = []string{profile}
+			genesis, err := BuildGenesis(&cfg)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if genesis.Config.AmsterdamTime == nil || *genesis.Config.AmsterdamTime != 0 {
+				t.Fatal("expected Amsterdam at genesis")
+			}
+			header := genesis.ToBlock().Header()
+			if header.SlotNumber == nil || *header.SlotNumber != 0 || header.BlockAccessListHash == nil || *header.BlockAccessListHash != types.EmptyBlockAccessListHash {
+				t.Fatal("incorrect Amsterdam genesis header")
+			}
+			want := profile == "system" || profile == "all"
+			for address, code := range map[common.Address][]byte{params.BuilderDepositAddress: params.BuilderDepositCode, params.BuilderExitAddress: params.BuilderExitCode} {
+				account, ok := genesis.Alloc[address]
+				if ok != want || (ok && (account.Nonce != 1 || !bytes.Equal(account.Code, code))) {
+					t.Fatalf("unexpected builder contract at %s for %s", address, profile)
+				}
+			}
+		})
 	}
 }

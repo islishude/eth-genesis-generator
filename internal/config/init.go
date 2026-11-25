@@ -2,6 +2,8 @@ package config
 
 import (
 	"fmt"
+	"os"
+	"path/filepath"
 	"sort"
 	"strconv"
 	"strings"
@@ -68,6 +70,46 @@ func (c *Config) ValidateInit() error {
 	return clone.Validate()
 }
 
+// WriteInitConfig creates the template before any artifacts are generated.
+func WriteInitConfig(c *Config, out string, force, requireEmpty bool) (string, error) {
+	if err := os.MkdirAll(out, 0o755); err != nil {
+		return "", fmt.Errorf("create output directory: %w", err)
+	}
+	if requireEmpty {
+		entries, err := os.ReadDir(out)
+		if err != nil {
+			return "", err
+		}
+		if len(entries) > 0 {
+			return "", fmt.Errorf("%s is not empty; choose a new or empty output directory", out)
+		}
+	}
+	path := filepath.Join(out, "genesis.yaml")
+	flags := os.O_WRONLY | os.O_CREATE | os.O_EXCL
+	if force && !requireEmpty {
+		flags = os.O_WRONLY | os.O_CREATE | os.O_TRUNC
+	}
+	mode := os.FileMode(0o644)
+	if c.Consensus.Mnemonic != "" {
+		mode = 0o600
+	}
+	f, err := os.OpenFile(path, flags, mode)
+	if os.IsExist(err) {
+		if requireEmpty {
+			return "", fmt.Errorf("%s already exists; choose a new or empty output directory", path)
+		}
+		return "", fmt.Errorf("%s already exists; use --force to overwrite", path)
+	}
+	if err != nil {
+		return "", err
+	}
+	if _, err := f.WriteString(RenderInitYAML(c)); err != nil {
+		_ = f.Close()
+		return "", err
+	}
+	return path, f.Close()
+}
+
 // RenderInitYAML renders the starter genesis.yaml with stable field and map order.
 func RenderInitYAML(c *Config) string {
 	var b strings.Builder
@@ -126,6 +168,7 @@ func RenderInitYAML(c *Config) string {
 	fmt.Fprintln(&b, "  #   deneb: \"0x04007e7e\"")
 	fmt.Fprintln(&b, "  #   electra: \"0x05007e7e\"")
 	fmt.Fprintln(&b, "  #   fulu: \"0x06007e7e\"")
+	fmt.Fprintln(&b, "  #   gloas: \"0x07007e7e\"")
 
 	return b.String()
 }

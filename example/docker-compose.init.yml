@@ -1,31 +1,22 @@
 # Run from the repository root:
-#   docker compose -f example/docker-compose.init.yml up --abort-on-container-exit
+#   docker compose -f example/docker-compose.init.yml up --build --abort-on-container-failure
 #
-# This builds the current eth-genesis-generator image, regenerates ./devnet,
+# This builds the current eth-genesis-generator image, generates ./devnet/artifacts,
 # and prepares runtime data consumed by example/docker-compose.yml.
 
 name: devnet-init
 
-x-reth-image: &reth-image ghcr.io/paradigmxyz/reth:v2.11.0
-x-lighthouse-image: &lighthouse-image sigp/lighthouse:v8.3.3
-x-alpine-image: &alpine-image alpine:3.24.4
 x-log-local: &log-local
   driver: local
 
 services:
-  jwt-init:
-    image: *alpine-image
+  genesis:
+    image: genesis-eth-generator:local
+    build:
+      context: ..
+      dockerfile: Dockerfile
     restart: "no"
-    command:
-      - sh
-      - -ec
-      - |
-        mkdir -p /devnet/runtime/jwt
-        if [ ! -s /devnet/runtime/jwt/jwt.hex ]; then
-          dd if=/dev/urandom bs=32 count=1 2>/dev/null | od -An -tx1 -v | tr -d ' \n' > /devnet/runtime/jwt/jwt.hex
-          chmod 600 /devnet/runtime/jwt/jwt.hex
-          sleep 1
-        fi
+    command: ["all", "--out", "/devnet/artifacts"]
     volumes:
       - type: bind
         source: ${PWD:?run this compose file from the repository root}/devnet
@@ -35,7 +26,7 @@ services:
     logging: *log-local
 
   lighthouse-testnet-init:
-    image: *alpine-image
+    image: alpine:3.24.4
     restart: "no"
     command:
       - sh
@@ -46,6 +37,9 @@ services:
         cp /devnet/artifacts/consensus/genesis.ssz /devnet/runtime/lighthouse-testnet/genesis.ssz
         printf "0\n" > /devnet/runtime/lighthouse-testnet/deposit_contract_block.txt
         sleep 1
+    depends_on:
+      genesis:
+        condition: service_completed_successfully
     volumes:
       - type: bind
         source: ${PWD:?run this compose file from the repository root}/devnet
@@ -55,14 +49,14 @@ services:
     logging: *log-local
 
   reth-init:
-    image: *reth-image
+    image: ghcr.io/paradigmxyz/reth:v2.11.0
     restart: "no"
     command:
       - init
       - --datadir=/data
-      - --chain=/config/genesis.json
+      - --chain=/artifacts/execution/genesis.json
     depends_on:
-      jwt-init:
+      genesis:
         condition: service_completed_successfully
     volumes:
       - type: bind
@@ -72,16 +66,15 @@ services:
         bind:
           create_host_path: true
       - type: bind
-        source: ${PWD:?run this compose file from the repository
-          root}/devnet/artifacts/execution/genesis.json
-        target: /config/genesis.json
+        source: ${PWD:?run this compose file from the repository root}/devnet/artifacts
+        target: /artifacts
         read_only: true
         bind:
-          create_host_path: false
+          create_host_path: true
     logging: *log-local
 
   lighthouse-validator-import:
-    image: *lighthouse-image
+    image: sigp/lighthouse:v8.3.3
     restart: "no"
     command:
       - sh
@@ -92,8 +85,8 @@ services:
           lighthouse account validator import \
             --datadir=/data \
             --testnet-dir=/testnet \
-            --directory=/validator-keys \
-            --password-file=/validator-keys/password.txt \
+            --directory=/artifacts/validators/keystores \
+            --password-file=/artifacts/validators/keystores/password.txt \
             --reuse-password
           touch /data/.validator-import-complete
           sleep 1
@@ -116,9 +109,8 @@ services:
         bind:
           create_host_path: true
       - type: bind
-        source: ${PWD:?run this compose file from the repository
-          root}/devnet/artifacts/validators/keystores
-        target: /validator-keys
+        source: ${PWD:?run this compose file from the repository root}/devnet/artifacts
+        target: /artifacts
         read_only: true
         bind:
           create_host_path: true

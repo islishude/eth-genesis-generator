@@ -2,15 +2,104 @@ package main
 
 import (
 	"bytes"
+	"encoding/json"
 	"os"
 	"path/filepath"
 	"strings"
 	"testing"
+	"time"
 
-	"gopkg.in/yaml.v3"
+	"go.yaml.in/yaml/v4"
 
+	"github.com/islishude/eth-genesis-generator/internal/artifacts"
 	appconfig "github.com/islishude/eth-genesis-generator/internal/config"
 )
+
+func TestAllMatchesTwoStepGenesis(t *testing.T) {
+	one, two := t.TempDir(), t.TempDir()
+	flags := []string{"--chain-id", "12345", "--genesis-time", "1700000100", "--validator-count", "1", "--mnemonic", "legal winner thank year wave sausage worth useful legal winner thank yellow"}
+	for _, args := range [][]string{
+		append([]string{"all", "--out", one}, flags...),
+		append([]string{"init", "--out", two}, flags...),
+		{"generate", "--config", filepath.Join(two, "genesis.yaml"), "--out", two},
+	} {
+		if code, _, stderr := runCLI(args...); code != 0 {
+			t.Fatalf("%s: %s", args[0], stderr)
+		}
+	}
+	info, err := os.Stat(filepath.Join(one, "genesis.yaml"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if info.Mode().Perm() != 0o600 {
+		t.Fatalf("config mode = %v", info.Mode().Perm())
+	}
+	got, want := readManifest(t, one), readManifest(t, two)
+	if got.ChainID != 12345 || got.ExecutionGenesisHash == "" || got.ExecutionGenesisHash != want.ExecutionGenesisHash {
+		t.Fatal("unexpected chain ID or execution genesis hash")
+	}
+	readSSZ := func(dir string) []byte {
+		data, err := os.ReadFile(filepath.Join(dir, "consensus", "genesis.ssz"))
+		if err != nil {
+			t.Fatal(err)
+		}
+		return data
+	}
+	if !bytes.Equal(readSSZ(one), readSSZ(two)) {
+		t.Fatal("consensus genesis differs")
+	}
+}
+
+func TestAllDefaults(t *testing.T) {
+	t.Chdir(t.TempDir())
+	start := uint64(time.Now().Unix()) + 60
+	if code, _, stderr := runCLI("all", "--validator-count", "1"); code != 0 {
+		t.Fatal(stderr)
+	}
+	cfg := readInitConfig(t, "devnet")
+	m := readManifest(t, "devnet")
+	if cfg.Network.GenesisTime != 0 || cfg.Consensus.Mnemonic != "" || !m.GeneratedMnemonic || m.GenesisTime < start || m.GenesisTime > uint64(time.Now().Unix())+60 {
+		t.Fatal("unexpected template or resolved defaults")
+	}
+}
+
+func TestAllRejectsInvalidInput(t *testing.T) {
+	out := filepath.Join(t.TempDir(), "devnet")
+	if code, _, stderr := runCLI("all", "--out", out, "--chain-id", "0"); code == 0 || !strings.Contains(stderr, "network.chain_id") {
+		t.Fatalf("unexpected result: %d %s", code, stderr)
+	}
+	if _, err := os.Stat(out); !os.IsNotExist(err) {
+		t.Fatalf("unexpected output directory: %v", err)
+	}
+}
+
+func TestAllRejectsNonemptyDirectory(t *testing.T) {
+	out := t.TempDir()
+	path := filepath.Join(out, ".existing")
+	if err := os.WriteFile(path, []byte("original"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	if code, _, stderr := runCLI("all", "--out", out); code == 0 || !strings.Contains(stderr, "choose a new or empty") {
+		t.Fatalf("unexpected result: %d %s", code, stderr)
+	}
+	entries, err := os.ReadDir(out)
+	if err != nil || len(entries) != 1 || entries[0].Name() != ".existing" {
+		t.Fatalf("unexpected entries: %v, %v", entries, err)
+	}
+}
+
+func readManifest(t *testing.T, dir string) artifacts.Manifest {
+	t.Helper()
+	data, err := os.ReadFile(filepath.Join(dir, "manifest.json"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	var manifest artifacts.Manifest
+	if err := json.Unmarshal(data, &manifest); err != nil {
+		t.Fatal(err)
+	}
+	return manifest
+}
 
 func TestRunInitWritesDefaultConfigOnly(t *testing.T) {
 	outDir := t.TempDir()

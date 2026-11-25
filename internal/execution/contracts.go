@@ -8,8 +8,11 @@ import (
 
 	_ "embed"
 
+	"slices"
+
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
+	"github.com/ethereum/go-ethereum/params"
 
 	appconfig "github.com/islishude/eth-genesis-generator/internal/config"
 )
@@ -40,10 +43,15 @@ func addContractProfiles(alloc types.GenesisAlloc, cfg *appconfig.Config) error 
 		return err
 	}
 
+	systemAddresses := systemContractAddresses
+	if cfg.Consensus.Fork == "gloas" {
+		systemAddresses = append(slices.Clone(systemAddresses), params.BuilderDepositAddress.Hex(), params.BuilderExitAddress.Hex())
+	}
+
 	for _, profile := range cfg.Execution.Contracts {
 		switch profile {
 		case appconfig.ExecutionContractsProfileSystem:
-			if err := addContracts(alloc, registry, systemContractAddresses, cfg); err != nil {
+			if err := addContracts(alloc, registry, systemAddresses, cfg); err != nil {
 				return fmt.Errorf("execution.contracts profile %q: %w", profile, err)
 			}
 		case appconfig.ExecutionContractsProfileUtils:
@@ -51,7 +59,7 @@ func addContractProfiles(alloc types.GenesisAlloc, cfg *appconfig.Config) error 
 				return fmt.Errorf("execution.contracts profile %q: %w", profile, err)
 			}
 		case appconfig.ExecutionContractsProfileAll:
-			if err := addContracts(alloc, registry, systemContractAddresses, cfg); err != nil {
+			if err := addContracts(alloc, registry, systemAddresses, cfg); err != nil {
 				return fmt.Errorf("execution.contracts profile %q: %w", profile, err)
 			}
 			if err := addContracts(alloc, registry, utilsContractAddresses, cfg); err != nil {

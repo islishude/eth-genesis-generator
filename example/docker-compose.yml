@@ -3,14 +3,12 @@
 
 name: devnet
 
-x-reth-image: &reth-image ghcr.io/paradigmxyz/reth:v2.11.0
-x-lighthouse-image: &lighthouse-image sigp/lighthouse:v8.3.3
 x-log-local: &log-local
   driver: local
 
 services:
   reth:
-    image: *reth-image
+    image: ghcr.io/paradigmxyz/reth:v2.11.0
     restart: unless-stopped
     command:
       - node
@@ -25,7 +23,6 @@ services:
       - --http.corsdomain=*
       - --authrpc.addr=0.0.0.0
       - --authrpc.port=8551
-      - --authrpc.jwtsecret=/jwt/jwt.hex
     volumes:
       - type: bind
         source: ${PWD:?run this compose file from the repository
@@ -40,20 +37,17 @@ services:
         read_only: true
         bind:
           create_host_path: false
-      - type: bind
-        source: ${PWD:?run this compose file from the repository
-          root}/devnet/runtime/jwt
-        target: /jwt
-        read_only: true
-        bind:
-          create_host_path: false
+    healthcheck:
+      test: ["CMD-SHELL", "test -s /data/jwt.hex"]
+      interval: 2s
+      timeout: 2s
+      retries: 30
     ports:
       - "127.0.0.1:8545:8545"
-      - "127.0.0.1:8551:8551"
     logging: *log-local
 
   lighthouse-beacon:
-    image: *lighthouse-image
+    image: sigp/lighthouse:v8.3.3
     restart: unless-stopped
     command:
       - lighthouse
@@ -61,7 +55,7 @@ services:
       - --datadir=/data
       - --testnet-dir=/testnet
       - --execution-endpoint=http://reth:8551
-      - --execution-jwt=/jwt/jwt.hex
+      - --execution-jwt=/reth/jwt.hex
       - --http
       - --http-address=0.0.0.0
       - --http-port=5052
@@ -70,7 +64,7 @@ services:
       - --suggested-fee-recipient=0x1000000000000000000000000000000000000001
     depends_on:
       reth:
-        condition: service_started
+        condition: service_healthy
     volumes:
       - type: bind
         source: ${PWD:?run this compose file from the repository
@@ -87,8 +81,8 @@ services:
           create_host_path: false
       - type: bind
         source: ${PWD:?run this compose file from the repository
-          root}/devnet/runtime/jwt
-        target: /jwt
+          root}/devnet/runtime/reth
+        target: /reth
         read_only: true
         bind:
           create_host_path: false
@@ -97,7 +91,7 @@ services:
     logging: *log-local
 
   lighthouse-validator:
-    image: *lighthouse-image
+    image: sigp/lighthouse:v8.3.3
     restart: unless-stopped
     command:
       - lighthouse

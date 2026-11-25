@@ -76,6 +76,10 @@ func BuildGenesis(elGenesis *core.Genesis, clConfigPath string, mnemonicsPath st
 		return nil, fmt.Errorf("consensus eth1_data.block_hash %s does not match execution genesis hash %s", eth1Hash, expected)
 	}
 
+	if state.Version == spec.DataVersionGloas && common.Hash(state.Gloas.LatestBlockHash) != expected {
+		return nil, fmt.Errorf("consensus latest_block_hash %s does not match execution genesis hash %s", common.Hash(state.Gloas.LatestBlockHash), expected)
+	}
+
 	stateValidators, err := state.Validators()
 	if err != nil {
 		return nil, err
@@ -94,6 +98,8 @@ func BuildGenesis(elGenesis *core.Genesis, clConfigPath string, mnemonicsPath st
 // ETH1BlockHash extracts eth1_data.block_hash across supported beacon state versions.
 func ETH1BlockHash(state *spec.VersionedBeaconState) (common.Hash, error) {
 	switch state.Version {
+	case spec.DataVersionGloas:
+		return common.BytesToHash(state.Gloas.ETH1Data.BlockHash), nil
 	case spec.DataVersionFulu:
 		return common.BytesToHash(state.Fulu.ETH1Data.BlockHash), nil
 	case spec.DataVersionElectra:

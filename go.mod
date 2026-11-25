@@ -1,18 +1,17 @@
 module github.com/islishude/eth-genesis-generator
 
-go 1.26.2
+go 1.27.4
 
 require (
 	github.com/ethereum/go-ethereum v1.17.10
 	github.com/ethpandaops/eth-beacon-genesis v0.0.8
 	github.com/ethpandaops/go-eth2-client v0.1.12
-	github.com/google/uuid v1.6.0
 	github.com/supranational/blst v0.3.17
 	github.com/tyler-smith/go-bip39 v1.1.0
 	github.com/urfave/cli/v2 v2.27.7
+	go.yaml.in/yaml/v4 v4.0.0
 	golang.org/x/crypto v0.59.0
 	golang.org/x/text v0.44.0
-	gopkg.in/yaml.v3 v3.0.1
 )
 
 require (
@@ -70,6 +69,7 @@ require (
 	github.com/golang/protobuf v1.5.4 // indirect
 	github.com/golang/snappy v1.0.1-0.20260716114414-9ae09f520e93 // indirect
 	github.com/google/pprof v0.0.0-20230207041349-798e818bf904 // indirect
+	github.com/google/uuid v1.6.0 // indirect
 	github.com/gorilla/websocket v1.4.2 // indirect
 	github.com/grafana/pyroscope-go v1.2.7 // indirect
 	github.com/grafana/pyroscope-go/godeltaprof v0.1.9 // indirect
@@ -155,6 +155,7 @@ require (
 	gopkg.in/cenkalti/backoff.v1 v1.1.0 // indirect
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
+	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
 tool github.com/ethereum/go-ethereum/cmd/geth

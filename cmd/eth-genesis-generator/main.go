@@ -49,11 +49,26 @@ func newApp(stdout, stderr io.Writer) *cli.App {
 		},
 		Commands: []*cli.Command{
 			{
+				Name:  "all",
+				Usage: "Write genesis.yaml and generate all artifacts in a new or empty directory",
+				Flags: configFlags("new or empty directory for genesis.yaml and artifacts"),
+				Action: func(ctx *cli.Context) error {
+					path, err := writeConfig(ctx, stdout, true)
+					if err != nil {
+						return err
+					}
+					return runGenerate(path, ctx.String("out"), stdout)
+				},
+			},
+			{
 				Name:  "init",
 				Usage: "Write a configurable genesis.yaml template",
-				Flags: initFlags(),
+				Flags: append(configFlags("directory to write genesis.yaml into"), &cli.BoolFlag{
+					Name: "force", Usage: "overwrite an existing genesis.yaml",
+				}),
 				Action: func(ctx *cli.Context) error {
-					return runInit(ctx, stdout)
+					_, err := writeConfig(ctx, stdout, false)
+					return err
 				},
 			},
 			{
@@ -72,18 +87,18 @@ func newApp(stdout, stderr io.Writer) *cli.App {
 					},
 				},
 				Action: func(ctx *cli.Context) error {
-					return runGenerate(ctx, stdout)
+					return runGenerate(ctx.String("config"), ctx.String("out"), stdout)
 				},
 			},
 		},
 	}
 }
 
-func initFlags() []cli.Flag {
+func configFlags(outUsage string) []cli.Flag {
 	return []cli.Flag{
 		&cli.StringFlag{
 			Name:  "out",
-			Usage: "directory to write genesis.yaml into",
+			Usage: outUsage,
 			Value: "./devnet",
 		},
 		&cli.StringFlag{
@@ -164,16 +179,10 @@ func initFlags() []cli.Flag {
 			Usage: "write consensus/genesis.json during generate",
 			Value: true,
 		},
-		&cli.BoolFlag{
-			Name:  "force",
-			Usage: "overwrite an existing genesis.yaml",
-			Value: false,
-		},
 	}
 }
 
-// runInit writes a starter genesis.yaml without generating artifacts.
-func runInit(ctx *cli.Context, stdout io.Writer) error {
+func writeConfig(ctx *cli.Context, stdout io.Writer, requireEmpty bool) (string, error) {
 	cfg := appconfig.DefaultInitConfig()
 	cfg.Network.Name = ctx.String("network-name")
 	cfg.Network.ChainID = ctx.Uint64("chain-id")
@@ -193,47 +202,32 @@ func runInit(ctx *cli.Context, stdout io.Writer) error {
 	if ctx.IsSet("execution-contracts") {
 		contracts, err := appconfig.ParseExecutionContractProfiles(ctx.String("execution-contracts"))
 		if err != nil {
-			return err
+			return "", err
 		}
 		cfg.Execution.Contracts = contracts
 	}
 	if ctx.IsSet("prefund") {
 		prefund, err := appconfig.ParsePrefundEntries(ctx.StringSlice("prefund"))
 		if err != nil {
-			return err
+			return "", err
 		}
 		cfg.Execution.Prefund = prefund
 	}
 	if err := cfg.ValidateInit(); err != nil {
-		return err
+		return "", err
 	}
 
-	out := ctx.String("out")
-	if err := os.MkdirAll(out, 0o755); err != nil {
-		return fmt.Errorf("create output directory: %w", err)
+	path, err := appconfig.WriteInitConfig(cfg, ctx.String("out"), ctx.Bool("force"), requireEmpty)
+	if err != nil {
+		return "", err
 	}
-
-	configPath := filepath.Join(out, "genesis.yaml")
-	if !ctx.Bool("force") {
-		if _, err := os.Stat(configPath); err == nil {
-			return fmt.Errorf("%s already exists; use --force to overwrite", configPath)
-		} else if !os.IsNotExist(err) {
-			return fmt.Errorf("stat %s: %w", configPath, err)
-		}
-	}
-
-	if err := os.WriteFile(configPath, []byte(appconfig.RenderInitYAML(cfg)), 0o644); err != nil {
-		return fmt.Errorf("write %s: %w", configPath, err)
-	}
-
-	_, _ = fmt.Fprintf(stdout, "wrote %s\n", configPath)
-	return nil
+	_, _ = fmt.Fprintf(stdout, "wrote %s\n", path)
+	return path, nil
 }
 
 // runGenerate loads a config file and writes all genesis artifacts.
-func runGenerate(ctx *cli.Context, stdout io.Writer) error {
-	out := ctx.String("out")
-	cfg, err := appconfig.LoadFile(ctx.String("config"), time.Now())
+func runGenerate(path, out string, stdout io.Writer) error {
+	cfg, err := appconfig.LoadFile(path, time.Now())
 	if err != nil {
 		return fmt.Errorf("load config: %w", err)
 	}

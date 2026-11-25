@@ -62,8 +62,6 @@ func RenderConfig(cfg *appconfig.Config) (string, error) {
 		fmt.Fprintf(&b, "%s: %s\n", appconfig.ForkVersionField(fork), appconfig.ForkVersion(cfg.Network.ChainID, fork, cfg.Consensus.ForkVersions))
 		fmt.Fprintf(&b, "%s: %d\n", appconfig.ForkEpochField(fork), epoch)
 	}
-	fmt.Fprintf(&b, "GLOAS_FORK_VERSION: %s\n", derivedForkVersion(cfg.Network.ChainID, 0x07))
-	fmt.Fprintf(&b, "GLOAS_FORK_EPOCH: %d\n", farFutureEpoch)
 
 	writeChainSpec(&b, cfg)
 
@@ -190,11 +188,6 @@ func chainSpecForPreset(presetBase string) chainSpecValues {
 		MinPerEpochChurnLimitElectra:        128000000000,
 		MaxPerEpochActivationExitChurnLimit: 256000000000,
 	}
-}
-
-func derivedForkVersion(chainID uint64, forkIndex uint32) string {
-	value := (forkIndex << 24) | uint32(chainID&0x00ff_ffff)
-	return fmt.Sprintf("0x%08x", value)
 }
 
 // RenderMnemonics renders validator input for eth-beacon-genesis.
